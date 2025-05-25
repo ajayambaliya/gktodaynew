@@ -4,6 +4,7 @@ from datetime import datetime
 from config import TEMPLATE_DIR, PDF_OUTPUT_DIR
 import sys
 import shutil
+from logo_generator import get_text_watermark
 
 def create_modern_pdf(articles, titles, output_filename=None):
     """
@@ -36,12 +37,6 @@ def create_modern_pdf(articles, titles, output_filename=None):
     if os.path.exists(qr_src):
         shutil.copy2(qr_src, qr_dst)
     
-    # Copy logo to output directory
-    logo_src = os.path.join(TEMPLATE_DIR, "currentadda_logo.png")
-    logo_dst = os.path.join(PDF_OUTPUT_DIR, "currentadda_logo.png")
-    if os.path.exists(logo_src):
-        shutil.copy2(logo_src, logo_dst)
-    
     # Create CSS directory if it doesn't exist
     css_dir = os.path.join(TEMPLATE_DIR, 'css')
     css_output_dir = os.path.join(PDF_OUTPUT_DIR, 'css')
@@ -62,8 +57,8 @@ def create_modern_pdf(articles, titles, output_filename=None):
         'current_year': datetime.now().year,
         'articles': articles,
         'titles': titles,
-        'logo_path': os.path.abspath(logo_dst).replace('\\', '/'),
-        'qr_path': os.path.abspath(qr_dst).replace('\\', '/')
+        'qr_path': os.path.abspath(qr_dst).replace('\\', '/'),
+        'watermark_text': get_text_watermark()
     }
     
     # Render HTML
@@ -93,9 +88,24 @@ def create_modern_pdf(articles, titles, output_filename=None):
         # Load CSS files
         css_list = [CSS(filename, font_config=font_config) for filename in css_files if os.path.exists(filename)]
         
-        # Generate PDF
+        # Add Google Fonts CSS for Gujarati text
+        gujarati_fonts_css = CSS(string="""
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Gujarati:wght@400;500;600;700&family=Hind+Vadodara:wght@400;500;600;700&display=swap');
+            
+            .gujarati-text, .gujarati-title, .gujarati-heading {
+                font-family: 'Noto Serif Gujarati', 'Hind Vadodara', serif;
+            }
+        """, font_config=font_config)
+        css_list.append(gujarati_fonts_css)
+        
+        # Generate PDF with proper page counter
         pdf_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.pdf")
-        HTML(filename=temp_html_path).write_pdf(pdf_path, stylesheets=css_list, font_config=font_config)
+        HTML(filename=temp_html_path).write_pdf(
+            pdf_path, 
+            stylesheets=css_list, 
+            font_config=font_config,
+            presentational_hints=True
+        )
         
         # Clean up temporary file
         if os.path.exists(temp_html_path):

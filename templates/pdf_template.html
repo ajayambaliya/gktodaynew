@@ -9,76 +9,342 @@
         @import url('css/components.css');
         @import url('css/layout.css');
         @import url('css/pdf.css');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Gujarati:wght@400;500;600;700&family=Hind+Vadodara:wght@400;500;600;700&display=swap');
 
         /* Page size optimization */
         @page {
             size: A4;
             margin: 0.5cm;
+            counter-increment: page;
+        }
+        
+        @page:first {
+            counter-reset: page 1;
         }
 
-        /* Watermark styles */
-        .watermark {
+        /* Center text watermark */
+        .text-watermark {
             position: fixed;
-            bottom: 10px;
-            right: 10px;
-            opacity: 0.15;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 6rem;
+            color: rgba(37, 99, 235, 0.06);
+            font-weight: var(--font-extrabold);
+            white-space: nowrap;
             z-index: -1;
-            transform: rotate(-45deg);
-            font-size: 3rem;
-            color: var(--primary-blue);
-            font-weight: var(--font-bold);
+            pointer-events: none;
         }
 
+        /* Page footer */
         .page-footer {
             position: fixed;
             bottom: 0;
-            width: 100%;
-            text-align: center;
+            left: 0;
+            right: 0;
+            height: 1.5cm;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1cm;
+            background: linear-gradient(90deg, var(--primary-blue-light) 0%, var(--primary-blue) 100%);
+            color: white;
             font-size: 0.8rem;
-            color: var(--text-tertiary);
-            padding: 0.5rem 0;
-            border-top: 1px solid var(--gray-200);
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            z-index: 1000;
         }
-
-        /* Logo in corner */
-        .corner-logo {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            width: 80px;
-            height: 80px;
-            opacity: 0.2;
-            z-index: -1;
+        
+        .page-number::after {
+            content: counter(page);
+        }
+        
+        .page-footer-logo {
+            font-weight: var(--font-bold);
+            letter-spacing: 1px;
+        }
+        
+        .page-footer-date {
+            font-weight: var(--font-medium);
+        }
+        
+        /* Modern Cover Page Styles */
+        .cover-page {
+            background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
+            color: white;
+            padding: 0;
+            margin: 0;
+            border-radius: 10px;
+            overflow: hidden;
+            page-break-after: always;
+            height: 98vh;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .cover-page-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cover-header {
+            padding: 2cm 1cm;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .cover-body {
+            flex: 1;
+            padding: 1cm;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cover-footer {
+            padding: 1cm;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .main-title {
+            font-size: 3.5rem;
+            font-weight: var(--font-extrabold);
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.05em;
+        }
+        
+        .date {
+            font-size: var(--text-xl);
+            font-weight: var(--font-light);
+            letter-spacing: 0.1em;
+            opacity: 0.9;
+        }
+        
+        .tagline {
+            font-size: var(--text-lg);
+            margin-top: 0.5rem;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        
+        .highlights-container {
+            margin-top: 1cm;
+            flex: 1;
+        }
+        
+        .highlights-title {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        .highlights-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 3px;
+        }
+        
+        .highlights-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .highlight-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 1rem;
+            border-left: 4px solid rgba(255, 255, 255, 0.5);
+            font-weight: var(--font-medium);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        .highlight-number {
+            background: rgba(255, 255, 255, 0.2);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            font-weight: var(--font-bold);
+            font-size: var(--text-sm);
+        }
+        
+        .qr-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        .qr-code {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .qr-code img {
+            width: 120px;
+            height: 120px;
+            border-radius: 10px;
+            background: white;
+            padding: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .telegram-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .telegram-link a {
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: var(--font-medium);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .telegram-info {
+            font-size: var(--text-sm);
+            opacity: 0.8;
+            max-width: 250px;
+            text-align: center;
+        }
+        
+        /* Article styles with borders */
+        .modern-article {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: var(--space-6);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-200);
+            page-break-inside: avoid;
+            position: relative;
+        }
+        
+        .article-header {
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--gray-200);
+            background-color: var(--bg-secondary);
+            position: relative;
+        }
+        
+        .article-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: var(--space-4);
+            width: 50px;
+            height: 3px;
+            background-color: var(--primary-blue);
+            border-radius: 3px;
+        }
+        
+        /* Fix Gujarati text */
+        .gujarati-text {
+            font-family: 'Noto Serif Gujarati', 'Hind Vadodara', serif;
+            font-size: 1rem;
+            line-height: 1.8;
+            letter-spacing: 0.02em;
+            word-spacing: 0.05em;
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            border-left: 3px solid var(--primary-blue);
+            padding: var(--space-3);
+            margin-bottom: var(--space-2);
+            text-align: justify;
+        }
+        
+        .gujarati-title {
+            font-family: 'Noto Serif Gujarati', 'Hind Vadodara', serif;
+            font-size: var(--text-2xl);
+            font-weight: var(--font-semibold);
+            color: var(--primary-blue);
+            margin-bottom: var(--space-1);
+            line-height: 1.3;
+        }
+        
+        .gujarati-heading {
+            font-family: 'Noto Serif Gujarati', 'Hind Vadodara', serif;
+            font-weight: var(--font-semibold);
+            line-height: 1.4;
+            margin-bottom: var(--space-2);
         }
     </style>
 </head>
 <body>
-    <!-- Watermark that appears on every page -->
-    <div class="watermark">CurrentAdda</div>
-    <div class="corner-logo">
-        <img src="{{ logo_path|default('currentadda_logo.png') }}" alt="CurrentAdda">
-    </div>
+    <!-- Center text watermark that appears on every page -->
+    <div class="text-watermark">{{ watermark_text }}</div>
     
     <!-- Cover Page -->
     <div class="cover-page">
         <div class="cover-page-content">
-            <h1 class="main-title">CurrentAdda</h1>
-            <p class="date">{{ date }}</p>
-            
-            <div class="highlights">
-                <h2>Today's Current Affairs</h2>
-                {% for title in titles[:3] %}
-                <div class="highlight-card">{{ title }}</div>
-                {% endfor %}
+            <div class="cover-header">
+                <h1 class="main-title">CurrentAdda</h1>
+                <p class="date">{{ date }}</p>
+                <p class="tagline">Daily Current Affairs for Competitive Exams</p>
             </div>
             
-            <div class="qr-code">
-                <img src="{{ qr_path|default('telegram_qr.png') }}" alt="Telegram QR Code">
-                <p>Scan to join our Telegram channel</p>
+            <div class="cover-body">
+                <div class="highlights-container">
+                    <h2 class="highlights-title">TODAY'S HIGHLIGHTS</h2>
+                    <div class="highlights-grid">
+                        {% for title in titles[:6] %}
+                        <div class="highlight-card">
+                            <div class="highlight-number">{{ loop.index }}</div>
+                            <div>{{ title }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="qr-section">
+                    <div class="qr-code">
+                        <img src="{{ qr_path|default('telegram_qr.png') }}" alt="Telegram QR Code">
+                        <p>Scan to join</p>
+                    </div>
+                    
+                    <div class="telegram-link">
+                        <a href="https://t.me/CurrentAdda">Join @CurrentAdda</a>
+                        <p class="telegram-info">Get daily current affairs updates in Gujarati & English</p>
+                    </div>
+                </div>
             </div>
             
-            <div class="telegram-link">
-                <a href="https://t.me/CurrentAdda">Join @CurrentAdda on Telegram</a>
+            <div class="cover-footer">
+                <p>Comprehensive coverage for UPSC, GPSC, Banking & SSC aspirants</p>
             </div>
         </div>
     </div>
@@ -143,7 +409,8 @@
 
     <!-- Page footer that appears on every page -->
     <div class="page-footer">
-        CurrentAdda - {{ date }} - Page <span class="page-number"></span>
+        <div class="page-footer-logo">CurrentAdda</div>
+        <div class="page-footer-date">{{ date }} - Page <span class="page-number"></span></div>
     </div>
 </body>
 </html> 
