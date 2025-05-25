@@ -6,7 +6,7 @@ load_dotenv()
 
 # Configuration settings
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHANNEL = "@CurrentAdda"
+TELEGRAM_CHANNEL = "@gujtest1"
 BASE_URL = "https://www.gktoday.in/current-affairs/"
 PAGE_COUNT = 4  # Number of pages to scrape
 
