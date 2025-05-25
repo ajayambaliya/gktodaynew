@@ -6,6 +6,33 @@ from scraper import fetch_article_urls, get_all_articles
 from pdf_generator import create_modern_pdf
 from telegram_sender import send_pdf_to_telegram
 from qr_generator import generate_qr_code
+from logo_generator import generate_logo
+
+def extract_topics_from_articles(articles, max_topics=5):
+    """
+    Extract main topics from article titles for the Telegram caption.
+    
+    Args:
+        articles: List of article dictionaries
+        max_topics: Maximum number of topics to extract
+        
+    Returns:
+        List of topic strings
+    """
+    topics = []
+    
+    # Extract English titles as topics
+    for article in articles:
+        if 'english_title' in article and article['english_title']:
+            # Clean up the title - remove any special formatting
+            topic = article['english_title'].strip()
+            topics.append(topic)
+            
+            # Stop once we have enough topics
+            if len(topics) >= max_topics:
+                break
+    
+    return topics
 
 async def main():
     """Main function to orchestrate the entire process."""
@@ -20,6 +47,11 @@ async def main():
         telegram_url = "https://t.me/CurrentAdda"
         qr_path = os.path.join(TEMPLATE_DIR, "telegram_qr.png")
         generate_qr_code(telegram_url, qr_path)
+        
+        # Generate logo for watermark
+        print("Generating CurrentAdda logo...")
+        logo_path = os.path.join(TEMPLATE_DIR, "currentadda_logo.png")
+        generate_logo(logo_path)
         
         # Step 1: Fetch article URLs
         print(f"Fetching article URLs from {BASE_URL}...")
@@ -38,6 +70,9 @@ async def main():
         
         print(f"Successfully processed {len(articles)} articles")
         
+        # Extract topics from articles for Telegram caption
+        topics = extract_topics_from_articles(articles)
+        
         # Step 3: Generate PDF
         print("Generating PDF...")
         current_date = datetime.now().strftime('%d-%m-%Y')
@@ -46,8 +81,8 @@ async def main():
         
         # Step 4: Send to Telegram
         print("Sending output to Telegram...")
-        caption = f"Current Affairs for {datetime.now().strftime('%d %B %Y')}\n\nFollow @CurrentAdda for daily updates!"
-        success = await send_pdf_to_telegram(output_path, caption)
+        formatted_date = datetime.now().strftime('%d %B %Y')
+        success = await send_pdf_to_telegram(output_path, topics=topics)
         
         if success:
             print("Process completed successfully!")

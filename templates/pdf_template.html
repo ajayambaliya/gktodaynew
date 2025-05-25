@@ -9,9 +9,56 @@
         @import url('css/components.css');
         @import url('css/layout.css');
         @import url('css/pdf.css');
+
+        /* Page size optimization */
+        @page {
+            size: A4;
+            margin: 0.5cm;
+        }
+
+        /* Watermark styles */
+        .watermark {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            opacity: 0.15;
+            z-index: -1;
+            transform: rotate(-45deg);
+            font-size: 3rem;
+            color: var(--primary-blue);
+            font-weight: var(--font-bold);
+        }
+
+        .page-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            padding: 0.5rem 0;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        /* Logo in corner */
+        .corner-logo {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 80px;
+            height: 80px;
+            opacity: 0.2;
+            z-index: -1;
+        }
     </style>
 </head>
 <body>
+    <!-- Watermark that appears on every page -->
+    <div class="watermark">CurrentAdda</div>
+    <div class="corner-logo">
+        <img src="currentadda_logo.png" alt="CurrentAdda">
+    </div>
+    
     <!-- Cover Page -->
     <div class="cover-page">
         <div class="cover-page-content">
@@ -37,7 +84,7 @@
     </div>
     
     <!-- Articles -->
-    <div class="container">
+    <div class="container-wide">
         {% for article in articles %}
         <article class="modern-article card-elevated">
             <div class="article-header">
@@ -92,6 +139,11 @@
     <div class="footer">
         <p>© {{ current_year }} CurrentAdda - Daily Current Affairs</p>
         <p>Join our Telegram channel: <a href="https://t.me/CurrentAdda">@CurrentAdda</a></p>
+    </div>
+
+    <!-- Page footer that appears on every page -->
+    <div class="page-footer">
+        CurrentAdda - {{ date }} - Page <span class="page-number"></span>
     </div>
 </body>
 </html> 

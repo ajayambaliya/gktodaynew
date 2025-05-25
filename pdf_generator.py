@@ -48,6 +48,12 @@ def create_modern_pdf(articles, titles, output_filename=None):
     if os.path.exists(qr_src):
         shutil.copy2(qr_src, qr_dst)
     
+    # Copy logo to output directory
+    logo_src = os.path.join(TEMPLATE_DIR, "currentadda_logo.png")
+    logo_dst = os.path.join(PDF_OUTPUT_DIR, "currentadda_logo.png")
+    if os.path.exists(logo_src):
+        shutil.copy2(logo_src, logo_dst)
+    
     try:
         # Try to import WeasyPrint and generate PDF
         from weasyprint import HTML, CSS
