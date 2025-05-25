@@ -92,7 +92,7 @@ def download_and_convert_image(url):
 async def scrape_and_get_content(url):
     """Scrape article content and process it for PDF generation."""
     try:
-        response = requests.get(url, timeout=10)
+        response = requests.get(url, timeout=20)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         
@@ -138,15 +138,58 @@ async def scrape_and_get_content(url):
             'content': []
         }
         
+        # Find and remove specific sections to exclude from scraping
+        # 1. Remove ShareThis buttons
+        share_buttons = main_content.find_all('div', class_='sharethis-inline-share-buttons')
+        for div in share_buttons:
+            div.decompose()
+        
+        # 2. Remove related articles section
+        related_articles = main_content.find_all('div', class_='related-articles')
+        for div in related_articles:
+            div.decompose()
+        
+        # 3. Remove comments section
+        comments_section = main_content.find(id='comments')
+        if comments_section:
+            comments_section.decompose()
+        
+        # Additional comment sections that might be present
+        respond_section = main_content.find(id='respond')
+        if respond_section:
+            respond_section.decompose()
+        
         # Process only the content elements (paragraphs, headings, lists)
         # Skip breadcrumb, post-meta, comments and other non-content elements
         content_elements = []
         for tag in main_content.find_all(['p', 'h2', 'h4', 'ul', 'ol']):
-            # Skip elements inside comments, sharethis, related-articles
-            if tag.parent.get('id') == 'comments' or \
-               (tag.parent.get('class') and any(c in ['sharethis-inline-share-buttons', 'related-articles', 'breadcrumb'] 
-                                             for c in tag.parent.get('class', []))):
+            # Skip elements inside unwanted sections
+            should_skip = False
+            
+            # Check if parent or grandparent has any of these classes or IDs
+            parent = tag.parent
+            for _ in range(3):  # Check up to 3 levels up
+                if not parent:
+                    break
+                
+                # Skip if parent has any of these classes or IDs
+                if parent.get('class'):
+                    parent_classes = ' '.join(parent.get('class', []))
+                    if any(cls in parent_classes for cls in ['sharethis', 'related-articles', 'comments', 'comment-respond']):
+                        should_skip = True
+                        break
+                
+                # Skip by ID
+                parent_id = parent.get('id', '')
+                if any(id_name in parent_id for id_name in ['comments', 'respond']):
+                    should_skip = True
+                    break
+                
+                parent = parent.parent
+            
+            if should_skip:
                 continue
+            
             content_elements.append(tag)
             
         numbered_list_counter = 1
