@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CurrentAdda - {{ date }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Gujarati:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --primary-blue: #2563eb;
+            --primary-blue-light: #3b82f6;
+            --primary-blue-dark: #1d4ed8;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .cover-page {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            page-break-after: always;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .main-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .date {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+        }
+        
+        .highlights {
+            margin-top: 30px;
+        }
+        
+        .highlight-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .telegram-link {
+            margin-top: 40px;
+            font-size: 1.2rem;
+        }
+        
+        .telegram-link a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+        }
+        
+        .modern-article {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            page-break-inside: avoid;
+        }
+        
+        .gujarati-title {
+            font-family: 'Noto Serif Gujarati', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .english-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        
+        .hero-image {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        
+        .content-paragraph {
+            margin-bottom: 16px;
+        }
+        
+        .gujarati-text {
+            font-family: 'Noto Serif Gujarati', serif;
+            font-size: 1.1rem;
+            line-height: 1.75;
+            letter-spacing: 0.025em;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-blue);
+            padding: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .english-text {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .content-bullet_list {
+            margin: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        
+        .content-bullet_list::before {
+            content: '•';
+            color: var(--primary-blue);
+            font-weight: bold;
+            position: absolute;
+            left: 8px;
+        }
+        
+        .content-numbered_list {
+            margin: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+        
+        .content-heading_2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-blue-dark);
+            margin-top: 24px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--primary-blue-light);
+            padding-bottom: 8px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cover Page -->
+    <div class="cover-page">
+        <h1 class="main-title">CurrentAdda</h1>
+        <p class="date">{{ date }}</p>
+        <div class="highlights">
+            <h2>Today's Current Affairs</h2>
+            {% for title in titles[:3] %}
+            <div class="highlight-card">{{ title }}</div>
+            {% endfor %}
+        </div>
+        <div class="telegram-link">
+            <a href="https://t.me/CurrentAdda">Join @CurrentAdda on Telegram</a>
+        </div>
+    </div>
+    
+    <!-- Articles -->
+    {% for article in articles %}
+    <article class="modern-article">
+        <h2 class="gujarati-title">{{ article.gujarati_title }}</h2>
+        <h2 class="english-title">{{ article.english_title }}</h2>
+        
+        {% if article.image %}
+        <div class="hero-image">
+            <img src="{{ article.image }}" alt="Article Image">
+        </div>
+        {% endif %}
+        
+        <div class="content-blocks">
+            {% for block in article.content %}
+                {% if block.type == 'paragraph' %}
+                    {% if block.is_gujarati %}
+                    <div class="content-paragraph gujarati-text">{{ block.text }}</div>
+                    {% else %}
+                    <div class="content-paragraph english-text">{{ block.text }}</div>
+                    {% endif %}
+                {% elif block.type == 'heading_2' or block.type == 'heading_4' %}
+                    {% if block.is_gujarati %}
+                    <div class="content-{{ block.type }} gujarati-text">{{ block.text }}</div>
+                    {% else %}
+                    <div class="content-{{ block.type }} english-text">{{ block.text }}</div>
+                    {% endif %}
+                {% elif block.type == 'bullet_list' %}
+                    {% if block.is_gujarati %}
+                    <div class="content-{{ block.type }} gujarati-text">• {{ block.text }}</div>
+                    {% else %}
+                    <div class="content-{{ block.type }} english-text">• {{ block.text }}</div>
+                    {% endif %}
+                {% elif block.type == 'numbered_list' %}
+                    {% if block.is_gujarati %}
+                    <div class="content-{{ block.type }} gujarati-text">{{ block.number }}. {{ block.text }}</div>
+                    {% else %}
+                    <div class="content-{{ block.type }} english-text">{{ block.number }}. {{ block.text }}</div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </article>
+    {% endfor %}
+    
+    <div class="footer">
+        <p>© {{ current_year }} CurrentAdda - Daily Current Affairs</p>
+        <p>Join our Telegram channel: <a href="https://t.me/CurrentAdda">@CurrentAdda</a></p>
+    </div>
+</body>
+</html> 
