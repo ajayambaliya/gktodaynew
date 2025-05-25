@@ -5,6 +5,7 @@ from config import TEMPLATE_DIR, PDF_OUTPUT_DIR
 import sys
 import shutil
 from logo_generator import get_text_watermark
+import re
 
 def create_modern_pdf(articles, titles, output_filename=None):
     """
@@ -77,14 +78,28 @@ def create_modern_pdf(articles, titles, output_filename=None):
                 # Skip navigation items that match the title or standard navigation text
                 if block.get('type') == 'paragraph' and block.get('text'):
                     text = block.get('text', '').strip()
-                    if text.startswith('•Home') or text.startswith('•Current Affairs Today') or \
-                       text == f"•{processed_article.get('english_title')}" or \
+                    
+                    # Skip breadcrumb navigation
+                    if text.startswith('•Home') or text.startswith('•Current Affairs Today'):
+                        continue
+                        
+                    # Skip if it's just the title repeated
+                    if text == f"•{processed_article.get('english_title')}" or \
                        text == f"•{processed_article.get('gujarati_title')}":
                         continue
+                    
+                    # Skip post meta information
+                    if re.search(r'•\s*\d+\s*\w+\s*\d{4}', text) or \
+                       'Current Affairs Today - Current Affairs -' in text:
+                        continue
+                
                 filtered_content.append(block)
             processed_article['content'] = filtered_content
         
         processed_articles.append(processed_article)
+    
+    # Count total pages for page numbering
+    total_pages = len(processed_articles) + 1  # +1 for cover page
     
     # Prepare context data for the template with absolute paths
     current_date = datetime.now().strftime('%d %B %Y')
@@ -94,7 +109,8 @@ def create_modern_pdf(articles, titles, output_filename=None):
         'articles': processed_articles,
         'titles': titles,
         'qr_path': os.path.abspath(qr_dst).replace('\\', '/'),
-        'watermark_text': get_text_watermark()
+        'watermark_text': get_text_watermark(),
+        'total_pages': total_pages
     }
     
     # Render HTML
@@ -160,6 +176,16 @@ def create_modern_pdf(articles, titles, output_filename=None):
                 .fa-file-pdf:before { content: "\\f1c1"; }
             """, font_config=font_config)
             css_list.append(fontawesome_css)
+        
+        # Add page counter CSS
+        page_counter_css = CSS(string=f"""
+            @page {{
+                @bottom-right {{
+                    content: "Page " counter(page) " of {total_pages}";
+                }}
+            }}
+        """)
+        css_list.append(page_counter_css)
         
         # Generate PDF with proper page counter
         pdf_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.pdf")
