@@ -21,6 +21,11 @@
         @page:first {
             counter-reset: page 1;
         }
+        
+        /* Set total pages variable */
+        :root {
+            --total-pages: "{{ total_pages|default('∞') }}";
+        }
 
         /* Center text watermark */
         .text-watermark {
@@ -56,7 +61,7 @@
         }
         
         .page-number::after {
-            content: counter(page) " of " counter(pages);
+            content: counter(page);
         }
         
         .page-footer-logo {
@@ -351,7 +356,14 @@
             <div class="cover-body">
                 <div class="highlights-container">
                     <h2 class="highlights-title">TODAY'S HIGHLIGHTS</h2>
-                    <div class="highlights-grid">
+                    {% set highlight_count = titles|length %}
+                    {% if highlight_count <= 2 %}
+                    <div class="highlights-grid few-items">
+                    {% elif highlight_count <= 6 %}
+                    <div class="highlights-grid medium-items">
+                    {% else %}
+                    <div class="highlights-grid many-items">
+                    {% endif %}
                         {% for title in titles %}
                         <div class="highlight-card">
                             <div class="highlight-number">{{ loop.index }}</div>

@@ -7,7 +7,6 @@ from translation import translate_to_gujarati
 import base64
 from config import BASE_URL, PAGE_COUNT
 import random
-import re
 
 def fetch_article_urls(base_url, pages):
     """Fetch article URLs from multiple pages of GKToday current affairs."""
@@ -155,16 +154,6 @@ async def scrape_and_get_content(url):
         if comments_section:
             comments_section.decompose()
         
-        # 4. Remove post-meta section
-        post_meta = main_content.find_all('div', class_='post-meta')
-        for div in post_meta:
-            div.decompose()
-        
-        # 5. Remove breadcrumb section
-        breadcrumb = main_content.find_all('div', class_='breadcrumb')
-        for div in breadcrumb:
-            div.decompose()
-            
         # Additional comment sections that might be present
         respond_section = main_content.find(id='respond')
         if respond_section:
@@ -186,7 +175,7 @@ async def scrape_and_get_content(url):
                 # Skip if parent has any of these classes or IDs
                 if parent.get('class'):
                     parent_classes = ' '.join(parent.get('class', []))
-                    if any(cls in parent_classes for cls in ['sharethis', 'related-articles', 'comments', 'comment-respond', 'post-meta', 'breadcrumb']):
+                    if any(cls in parent_classes for cls in ['sharethis', 'related-articles', 'comments', 'comment-respond']):
                         should_skip = True
                         break
                 
@@ -200,17 +189,6 @@ async def scrape_and_get_content(url):
             
             if should_skip:
                 continue
-                
-            # Skip breadcrumb navigation and post meta directly
-            if tag.name == 'p':
-                text = tag.get_text().strip()
-                # Skip Home, Current Affairs Today links
-                if text.startswith('Home') or 'Current Affairs Today - Current Affairs -' in text:
-                    continue
-                    
-                # Skip post-meta content with dates
-                if re.search(r'\d+\s+\w+\s+\d{4}', text) and len(text) < 50:
-                    continue
             
             content_elements.append(tag)
             
@@ -218,13 +196,6 @@ async def scrape_and_get_content(url):
         for tag in content_elements:
             text = tag.get_text().strip()
             if not text:
-                continue
-                
-            # Skip specific navigation patterns
-            if (text.startswith('Home') or 
-                'Current Affairs Today - Current Affairs -' in text or
-                text == article_info['english_title'] or
-                text == article_info['gujarati_title']):
                 continue
             
             translated_text = translate_to_gujarati(text)

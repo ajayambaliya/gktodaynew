@@ -4,8 +4,8 @@ from datetime import datetime
 from config import TEMPLATE_DIR, PDF_OUTPUT_DIR
 import sys
 import shutil
-from logo_generator import get_text_watermark
 import re
+from logo_generator import get_text_watermark
 
 def create_modern_pdf(articles, titles, output_filename=None):
     """
@@ -65,41 +65,27 @@ def create_modern_pdf(articles, titles, output_filename=None):
                 dst = os.path.join(css_output_dir, css_file)
                 shutil.copy2(src, dst)
     
-    # Process articles to remove duplicate navigation content
+    # Process articles to remove duplicate navigation content and post meta
     processed_articles = []
     for article in articles:
         # Create a copy of the article to avoid modifying the original
         processed_article = article.copy()
         
-        # Filter out navigation content blocks (Home, Current Affairs Today, etc.)
+        # Filter out navigation content blocks and post meta
         if 'content' in processed_article:
             filtered_content = []
             for block in processed_article['content']:
-                # Skip navigation items that match the title or standard navigation text
-                if block.get('type') == 'paragraph' and block.get('text'):
-                    text = block.get('text', '').strip()
-                    
-                    # Skip breadcrumb navigation
-                    if text.startswith('•Home') or text.startswith('•Current Affairs Today'):
-                        continue
-                        
-                    # Skip if it's just the title repeated
-                    if text == f"•{processed_article.get('english_title')}" or \
-                       text == f"•{processed_article.get('gujarati_title')}":
-                        continue
-                    
-                    # Skip post meta information
-                    if re.search(r'•\s*\d+\s*\w+\s*\d{4}', text) or \
-                       'Current Affairs Today - Current Affairs -' in text:
-                        continue
-                
+                # Skip blocks we want to filter
+                if should_filter_block(block, processed_article):
+                    continue
                 filtered_content.append(block)
             processed_article['content'] = filtered_content
         
         processed_articles.append(processed_article)
     
-    # Count total pages for page numbering
-    total_pages = len(processed_articles) + 1  # +1 for cover page
+    # Estimate total pages for pagination
+    # A rough estimate based on content size
+    total_pages = estimate_total_pages(processed_articles)
     
     # Prepare context data for the template with absolute paths
     current_date = datetime.now().strftime('%d %B %Y')
@@ -177,24 +163,24 @@ def create_modern_pdf(articles, titles, output_filename=None):
             """, font_config=font_config)
             css_list.append(fontawesome_css)
         
-        # Add page counter CSS
-        page_counter_css = CSS(string=f"""
-            @page {{
-                @bottom-right {{
-                    content: "Page " counter(page) " of {total_pages}";
-                }}
-            }}
-        """)
-        css_list.append(page_counter_css)
-        
         # Generate PDF with proper page counter
         pdf_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.pdf")
-        HTML(filename=temp_html_path).write_pdf(
-            pdf_path, 
-            stylesheets=css_list, 
-            font_config=font_config,
-            presentational_hints=True
-        )
+        document = HTML(filename=temp_html_path).render(stylesheets=css_list, font_config=font_config)
+        
+        # Get actual page count and regenerate with correct total
+        actual_pages = len(document.pages)
+        
+        # Update context with actual page count
+        context['total_pages'] = actual_pages
+        
+        # Re-render HTML with accurate page count
+        html_content = template.render(**context)
+        with open(temp_html_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        
+        # Generate final PDF
+        document = HTML(filename=temp_html_path).render(stylesheets=css_list, font_config=font_config)
+        document.write_pdf(pdf_path)
         
         # Clean up temporary file
         if os.path.exists(temp_html_path):
@@ -211,4 +197,70 @@ def create_modern_pdf(articles, titles, output_filename=None):
         with open(html_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
         print(f"HTML file created: {html_path}")
-        return html_path 
+        return html_path
+
+def should_filter_block(block, article):
+    """
+    Determine if a content block should be filtered out.
+    
+    Args:
+        block: The content block to check
+        article: The article containing the block
+    
+    Returns:
+        bool: True if the block should be filtered out, False otherwise
+    """
+    if not block.get('type') == 'paragraph' or not block.get('text'):
+        return False
+    
+    text = block.get('text', '').strip()
+    
+    # Filter navigation breadcrumbs
+    if text.startswith('•Home') or text.startswith('•Current Affairs Today'):
+        return True
+    
+    # Filter article title that appears in the navigation
+    if text == f"•{article.get('english_title')}" or text == f"•{article.get('gujarati_title')}":
+        return True
+    
+    # Filter post meta information
+    if ('calendar' in text.lower() and 'folder' in text.lower()) or re.search(r'\d{1,2} [A-Za-z]+ \d{4}', text):
+        return True
+    
+    # Filter breadcrumb navigation
+    if 'breadcrumb' in text.lower() or 'itemscope' in text.lower() or 'schema.org' in text.lower():
+        return True
+    
+    return False
+
+def estimate_total_pages(articles):
+    """
+    Estimate the total number of pages based on content.
+    
+    Args:
+        articles: List of processed articles
+    
+    Returns:
+        int: Estimated number of pages
+    """
+    # Start with 1 for the cover page
+    estimated_pages = 1
+    
+    # Rough estimate: each article takes about 1-2 pages depending on content
+    for article in articles:
+        content_length = 0
+        if 'content' in article:
+            content_length = len(article['content'])
+        
+        # Basic heuristic: longer content = more pages
+        if content_length <= 3:
+            estimated_pages += 1
+        elif content_length <= 8:
+            estimated_pages += 2
+        else:
+            estimated_pages += 3
+    
+    # Add 1 for the channel promotion and footer
+    estimated_pages += 1
+    
+    return estimated_pages 
