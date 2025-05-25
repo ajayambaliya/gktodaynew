@@ -7,6 +7,7 @@ from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL
 async def send_pdf_to_telegram(file_path, caption=None, topics=None):
     """
     Send PDF or HTML file to Current Adda Telegram channel with a beautifully formatted caption.
+    If both PDF and HTML files exist with the same name, prioritize the PDF.
     
     Args:
         file_path: Path to the PDF or HTML file to send
@@ -24,6 +25,13 @@ async def send_pdf_to_telegram(file_path, caption=None, topics=None):
         
         if not bot_token:
             raise ValueError("Bot token is missing from environment variables")
+        
+        # Check if we have a PDF version of the file
+        if file_path.lower().endswith('.html'):
+            pdf_path = file_path.replace('.html', '.pdf')
+            if os.path.exists(pdf_path):
+                print(f"Found PDF version, using {pdf_path} instead of {file_path}")
+                file_path = pdf_path
         
         # Telegram caption limit
         telegram_caption_limit = 1024

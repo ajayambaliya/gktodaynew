@@ -35,14 +35,20 @@ def generate_logo(output_path, size=(300, 300), bg_color=(37, 99, 235), text_col
     
     # Draw the logo text
     text = "CA"
-    text_width, text_height = draw.textsize(text, font=font_large) if hasattr(draw, 'textsize') else (size[0] * 0.4, size[1] * 0.4)
     
     # Position text in center
+    text_width = size[0] * 0.4
+    text_height = size[1] * 0.4
     x = (size[0] - text_width) / 2
     y = (size[1] - text_height) / 2
     
-    # Draw text
-    draw.text((x, y), text, font=font_large, fill=text_color)
+    # Draw text - handle different versions of PIL
+    try:
+        # For newer versions of PIL
+        draw.text((x, y), text, font=font_large, fill=text_color)
+    except TypeError:
+        # For older versions of PIL
+        draw.text((int(x), int(y)), text, fill=text_color)
     
     # Draw a circle around the text
     padding = size[0] * 0.1
@@ -59,11 +65,18 @@ def generate_logo(output_path, size=(300, 300), bg_color=(37, 99, 235), text_col
     
     # Add "CurrentAdda" text at the bottom
     bottom_text = "CurrentAdda"
-    bottom_width, bottom_height = draw.textsize(bottom_text, font=font_small) if hasattr(draw, 'textsize') else (size[0] * 0.8, size[1] * 0.1)
+    bottom_width = size[0] * 0.8
+    bottom_height = size[1] * 0.1
     bottom_x = (size[0] - bottom_width) / 2
     bottom_y = size[1] - bottom_height - padding
     
-    draw.text((bottom_x, bottom_y), bottom_text, font=font_small, fill=text_color)
+    # Draw bottom text - handle different versions of PIL
+    try:
+        # For newer versions of PIL
+        draw.text((bottom_x, bottom_y), bottom_text, font=font_small, fill=text_color)
+    except TypeError:
+        # For older versions of PIL
+        draw.text((int(bottom_x), int(bottom_y)), bottom_text, fill=text_color)
     
     # Ensure directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
