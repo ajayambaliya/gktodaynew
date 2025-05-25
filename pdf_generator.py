@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from config import TEMPLATE_DIR, PDF_OUTPUT_DIR
 import sys
+import shutil
 
 def create_modern_pdf(articles, titles, output_filename=None):
     """
@@ -41,11 +42,38 @@ def create_modern_pdf(articles, titles, output_filename=None):
     # Ensure output directory exists
     os.makedirs(PDF_OUTPUT_DIR, exist_ok=True)
     
+    # Copy QR code to output directory
+    qr_src = os.path.join(TEMPLATE_DIR, "telegram_qr.png")
+    qr_dst = os.path.join(PDF_OUTPUT_DIR, "telegram_qr.png")
+    if os.path.exists(qr_src):
+        shutil.copy2(qr_src, qr_dst)
+    
     try:
         # Try to import WeasyPrint and generate PDF
         from weasyprint import HTML, CSS
+        from weasyprint.text.fonts import FontConfiguration
+        
+        # Create CSS directory if it doesn't exist
+        css_dir = os.path.join(TEMPLATE_DIR, 'css')
+        os.makedirs(css_dir, exist_ok=True)
+        
+        # Configure fonts
+        font_config = FontConfiguration()
+        
+        # Get CSS files
+        css_files = [
+            os.path.join(css_dir, 'base.css'),
+            os.path.join(css_dir, 'components.css'),
+            os.path.join(css_dir, 'layout.css'),
+            os.path.join(css_dir, 'pdf.css')
+        ]
+        
+        # Load CSS files
+        css_list = [CSS(filename, font_config=font_config) for filename in css_files if os.path.exists(filename)]
+        
+        # Generate PDF
         pdf_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.pdf")
-        HTML(string=html_content).write_pdf(pdf_path)
+        HTML(string=html_content).write_pdf(pdf_path, stylesheets=css_list, font_config=font_config)
         print(f"Modern PDF created: {pdf_path}")
         return pdf_path
     except Exception as e:
@@ -54,6 +82,19 @@ def create_modern_pdf(articles, titles, output_filename=None):
         
         # Save as HTML instead
         html_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.html")
+        
+        # Also copy CSS files to output directory
+        css_output_dir = os.path.join(PDF_OUTPUT_DIR, 'css')
+        os.makedirs(css_output_dir, exist_ok=True)
+        
+        css_dir = os.path.join(TEMPLATE_DIR, 'css')
+        if os.path.exists(css_dir):
+            for css_file in ['base.css', 'components.css', 'layout.css', 'pdf.css']:
+                src = os.path.join(css_dir, css_file)
+                if os.path.exists(src):
+                    dst = os.path.join(css_output_dir, css_file)
+                    shutil.copy2(src, dst)
+        
         with open(html_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
         print(f"HTML file created: {html_path}")

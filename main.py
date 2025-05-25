@@ -1,10 +1,11 @@
 import asyncio
 import os
 from datetime import datetime
-from config import BASE_URL, PAGE_COUNT, PDF_OUTPUT_DIR
+from config import BASE_URL, PAGE_COUNT, PDF_OUTPUT_DIR, TEMPLATE_DIR
 from scraper import fetch_article_urls, get_all_articles
 from pdf_generator import create_modern_pdf
 from telegram_sender import send_pdf_to_telegram
+from qr_generator import generate_qr_code
 
 async def main():
     """Main function to orchestrate the entire process."""
@@ -13,6 +14,12 @@ async def main():
         
         # Create output directory if it doesn't exist
         os.makedirs(PDF_OUTPUT_DIR, exist_ok=True)
+        
+        # Generate QR code for Telegram channel
+        print("Generating Telegram QR code...")
+        telegram_url = "https://t.me/CurrentAdda"
+        qr_path = os.path.join(TEMPLATE_DIR, "telegram_qr.png")
+        generate_qr_code(telegram_url, qr_path)
         
         # Step 1: Fetch article URLs
         print(f"Fetching article URLs from {BASE_URL}...")

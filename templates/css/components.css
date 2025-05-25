@@ -1,0 +1,207 @@
+/* Modern Card System */
+.card {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    box-shadow: 
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        0 1px 2px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    margin-bottom: var(--space-6);
+}
+
+.card-elevated {
+    box-shadow: 
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.card-feature {
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Modern Information Boxes */
+.fact-box {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid var(--gray-200);
+    padding: var(--space-4);
+    margin: var(--space-4) 0;
+}
+
+.quote-box {
+    font-size: var(--text-xl);
+    line-height: var(--leading-relaxed);
+    padding: var(--space-6);
+    border-left: 4px solid var(--primary-blue);
+    background-color: var(--gray-50);
+    border-radius: 0 12px 12px 0;
+    margin: var(--space-6) 0;
+    position: relative;
+}
+
+.quote-box::before {
+    content: '"';
+    font-size: 4rem;
+    color: var(--gray-300);
+    position: absolute;
+    top: -1rem;
+    left: 1rem;
+    opacity: 0.5;
+}
+
+.alert-box {
+    padding: var(--space-4);
+    border-radius: 8px;
+    margin: var(--space-4) 0;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+.alert-box.info {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-left: 4px solid var(--primary-blue);
+}
+
+.alert-box.success {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-left: 4px solid var(--success-green);
+}
+
+.alert-box.warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    border-left: 4px solid var(--warning-amber);
+}
+
+.alert-box.error {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid var(--error-red);
+}
+
+.highlight-box {
+    background: var(--accent-gradient);
+    color: white;
+    padding: var(--space-4);
+    border-radius: 12px;
+    margin: var(--space-4) 0;
+}
+
+/* Advanced Image Treatment */
+.image-container {
+    border-radius: 12px;
+    overflow: hidden;
+    margin: var(--space-4) 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.image-with-overlay {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: var(--space-4) 0;
+}
+
+.image-with-overlay img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.image-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+    padding: var(--space-4);
+    color: white;
+}
+
+.image-caption {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-align: center;
+    padding: var(--space-2) 0;
+}
+
+/* Bilingual Typography */
+.gujarati-text {
+    font-family: 'Noto Serif Gujarati', serif;
+    font-size: 1.1rem;
+    line-height: 1.75;
+    letter-spacing: 0.025em;
+    word-spacing: 0.1em;
+    font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.gujarati-heading {
+    font-family: 'Noto Serif Gujarati', serif;
+    font-weight: var(--font-semibold);
+    line-height: 1.4;
+    margin-bottom: var(--space-4);
+}
+
+/* Modern Bullet Points */
+.modern-list {
+    list-style: none;
+    padding-left: var(--space-6);
+    margin: var(--space-4) 0;
+}
+
+.modern-list li {
+    position: relative;
+    margin-bottom: var(--space-3);
+    padding-left: var(--space-4);
+}
+
+.modern-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--primary-blue);
+}
+
+/* Numbered List */
+.numbered-list {
+    list-style: none;
+    counter-reset: item;
+    padding-left: var(--space-6);
+    margin: var(--space-4) 0;
+}
+
+.numbered-list li {
+    position: relative;
+    margin-bottom: var(--space-3);
+    padding-left: var(--space-4);
+    counter-increment: item;
+}
+
+.numbered-list li::before {
+    content: counter(item);
+    position: absolute;
+    left: -24px;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--primary-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-sm);
+} 
