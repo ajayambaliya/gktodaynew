@@ -41,7 +41,7 @@ A modern, magazine-style PDF generator for current affairs with Gujarati transla
    
    Create a `.env` file in the root directory with:
    ```
-   TELEGRAM_BOT_TOKEN=6206446036:AAHtVn9LAvdRUtjCLmz1_49v5xRPSanTD1g
+   TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
    ```
 
 ### Running Locally
