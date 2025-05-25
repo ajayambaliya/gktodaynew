@@ -37,6 +37,20 @@ def create_modern_pdf(articles, titles, output_filename=None):
     if os.path.exists(qr_src):
         shutil.copy2(qr_src, qr_dst)
     
+    # Copy FontAwesome if available
+    fa_src = os.path.join(TEMPLATE_DIR, "fontawesome.min.css")
+    fa_dst = os.path.join(PDF_OUTPUT_DIR, "fontawesome.min.css")
+    if os.path.exists(fa_src):
+        shutil.copy2(fa_src, fa_dst)
+    
+    # Copy FontAwesome webfonts if available
+    webfonts_src = os.path.join(TEMPLATE_DIR, "webfonts")
+    webfonts_dst = os.path.join(PDF_OUTPUT_DIR, "webfonts")
+    if os.path.exists(webfonts_src):
+        if os.path.exists(webfonts_dst):
+            shutil.rmtree(webfonts_dst)
+        shutil.copytree(webfonts_src, webfonts_dst)
+    
     # Create CSS directory if it doesn't exist
     css_dir = os.path.join(TEMPLATE_DIR, 'css')
     css_output_dir = os.path.join(PDF_OUTPUT_DIR, 'css')
@@ -50,12 +64,34 @@ def create_modern_pdf(articles, titles, output_filename=None):
                 dst = os.path.join(css_output_dir, css_file)
                 shutil.copy2(src, dst)
     
+    # Process articles to remove duplicate navigation content
+    processed_articles = []
+    for article in articles:
+        # Create a copy of the article to avoid modifying the original
+        processed_article = article.copy()
+        
+        # Filter out navigation content blocks (Home, Current Affairs Today, etc.)
+        if 'content' in processed_article:
+            filtered_content = []
+            for block in processed_article['content']:
+                # Skip navigation items that match the title or standard navigation text
+                if block.get('type') == 'paragraph' and block.get('text'):
+                    text = block.get('text', '').strip()
+                    if text.startswith('•Home') or text.startswith('•Current Affairs Today') or \
+                       text == f"•{processed_article.get('english_title')}" or \
+                       text == f"•{processed_article.get('gujarati_title')}":
+                        continue
+                filtered_content.append(block)
+            processed_article['content'] = filtered_content
+        
+        processed_articles.append(processed_article)
+    
     # Prepare context data for the template with absolute paths
     current_date = datetime.now().strftime('%d %B %Y')
     context = {
         'date': current_date,
         'current_year': datetime.now().year,
-        'articles': articles,
+        'articles': processed_articles,
         'titles': titles,
         'qr_path': os.path.abspath(qr_dst).replace('\\', '/'),
         'watermark_text': get_text_watermark()
@@ -85,6 +121,10 @@ def create_modern_pdf(articles, titles, output_filename=None):
             os.path.join(css_output_dir, 'pdf.css')
         ]
         
+        # Add FontAwesome CSS if available
+        if os.path.exists(fa_dst):
+            css_files.append(fa_dst)
+        
         # Load CSS files
         css_list = [CSS(filename, font_config=font_config) for filename in css_files if os.path.exists(filename)]
         
@@ -97,6 +137,29 @@ def create_modern_pdf(articles, titles, output_filename=None):
             }
         """, font_config=font_config)
         css_list.append(gujarati_fonts_css)
+        
+        # Add FontAwesome CSS if file doesn't exist
+        if not os.path.exists(fa_dst):
+            fontawesome_css = CSS(string="""
+                @font-face {
+                    font-family: 'FontAwesome';
+                    src: url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/webfonts/fa-solid-900.woff2') format('woff2');
+                    font-weight: 900;
+                    font-style: normal;
+                }
+                
+                .fa {
+                    font-family: 'FontAwesome';
+                    font-weight: 900;
+                }
+                
+                .fa-telegram:before { content: "\\f2c6"; }
+                .fa-check:before { content: "\\f00c"; }
+                .fa-clock:before { content: "\\f017"; }
+                .fa-language:before { content: "\\f1ab"; }
+                .fa-file-pdf:before { content: "\\f1c1"; }
+            """, font_config=font_config)
+            css_list.append(fontawesome_css)
         
         # Generate PDF with proper page counter
         pdf_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.pdf")

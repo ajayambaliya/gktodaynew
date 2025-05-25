@@ -302,6 +302,37 @@
             line-height: 1.4;
             margin-bottom: var(--space-2);
         }
+
+        /* Font Awesome for icons */
+        .fa {
+            font-family: FontAwesome;
+            display: inline-block;
+            font-style: normal;
+            font-weight: normal;
+            line-height: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .fa-telegram:before {
+            content: "\f2c6";
+        }
+        
+        .fa-check:before {
+            content: "\f00c";
+        }
+        
+        .fa-clock:before {
+            content: "\f017";
+        }
+        
+        .fa-language:before {
+            content: "\f1ab";
+        }
+        
+        .fa-file-pdf:before {
+            content: "\f1c1";
+        }
     </style>
 </head>
 <body>
@@ -321,10 +352,10 @@
                 <div class="highlights-container">
                     <h2 class="highlights-title">TODAY'S HIGHLIGHTS</h2>
                     <div class="highlights-grid">
-                        {% for title in titles[:6] %}
+                        {% for title in titles %}
                         <div class="highlight-card">
                             <div class="highlight-number">{{ loop.index }}</div>
-                            <div>{{ title }}</div>
+                            <div class="highlight-text">{{ title }}</div>
                         </div>
                         {% endfor %}
                     </div>
@@ -398,6 +429,42 @@
             </div>
         </article>
         {% endfor %}
+        
+        <!-- Channel Promotion -->
+        <div class="channel-promotion">
+            <div class="channel-promotion-content">
+                <h3 class="channel-promotion-title">
+                    <span class="fa fa-telegram telegram-icon"></span>
+                    Join Our Telegram Channel
+                </h3>
+                <p class="channel-promotion-text">
+                    Stay updated with the latest current affairs delivered daily to your device.
+                    Join thousands of aspirants who trust CurrentAdda for their exam preparation.
+                </p>
+                <a href="https://t.me/CurrentAdda" class="channel-promotion-button">
+                    Join @CurrentAdda
+                </a>
+                
+                <div class="channel-promotion-features">
+                    <div class="channel-feature">
+                        <span class="fa fa-check channel-feature-icon"></span>
+                        Daily Updates
+                    </div>
+                    <div class="channel-feature">
+                        <span class="fa fa-language channel-feature-icon"></span>
+                        Bilingual Content
+                    </div>
+                    <div class="channel-feature">
+                        <span class="fa fa-file-pdf channel-feature-icon"></span>
+                        PDF Downloads
+                    </div>
+                    <div class="channel-feature">
+                        <span class="fa fa-clock channel-feature-icon"></span>
+                        Timely Alerts
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div class="section-divider"></div>
@@ -409,7 +476,12 @@
 
     <!-- Page footer that appears on every page -->
     <div class="page-footer">
-        <div class="page-footer-logo">CurrentAdda</div>
+        <div class="page-footer-logo">
+            CurrentAdda By Ajay Ambaliya
+            <a href="https://t.me/CurrentAdda">
+                <span class="fa fa-telegram telegram-icon"></span>
+            </a>
+        </div>
         <div class="page-footer-date">{{ date }} - Page <span class="page-number"></span></div>
     </div>
 </body>
