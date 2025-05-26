@@ -108,8 +108,16 @@ def create_modern_pdf(articles, titles, output_filename=None):
     
     # Save HTML file for debugging or fallback
     html_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.html")
-    with open(html_path, 'w', encoding='utf-8') as f:
-        f.write(html_content)
+    
+    # Ensure proper encoding by explicitly handling any potential issues
+    try:
+        # First try with utf-8 encoding
+        with open(html_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+    except UnicodeEncodeError:
+        # If that fails, try with a more permissive encoding
+        with open(html_path, 'w', encoding='utf-8', errors='xmlcharrefreplace') as f:
+            f.write(html_content)
     
     # Define PDF path
     pdf_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.pdf")
@@ -121,16 +129,23 @@ def create_modern_pdf(articles, titles, output_filename=None):
             content = f.read()
             
         # Check if file starts with the problematic byte
-        if content.startswith(b'\xab'):
-            print("Found problematic byte 0xAB at start of file, removing it...")
+        if content.startswith(b'\xab') or content.startswith(b'\xb0'):
+            print("Found problematic byte at start of file, removing it...")
             with open(html_path, 'wb') as f:
                 f.write(content[1:])
         
-        # Check for any 0xAB bytes anywhere in the file
-        if b'\xab' in content:
-            count = content.count(b'\xab')
-            print(f"Found {count} instances of problematic byte 0xAB in file, cleaning...")
-            content = content.replace(b'\xab', b'')
+        # Check for any problematic bytes anywhere in the file
+        problematic_bytes = [b'\xab', b'\xb0', b'\xef\xbf\xbd']
+        needs_cleaning = False
+        
+        for pb in problematic_bytes:
+            if pb in content:
+                count = content.count(pb)
+                print(f"Found {count} instances of problematic byte sequence in file, cleaning...")
+                content = content.replace(pb, b'')
+                needs_cleaning = True
+        
+        if needs_cleaning:
             with open(html_path, 'wb') as f:
                 f.write(content)
                 
@@ -200,38 +215,7 @@ def create_modern_pdf(articles, titles, output_filename=None):
             """, font_config=font_config)
             css_list.append(fontawesome_css)
         
-        # Try a completely different approach: use subprocess to call wkhtmltopdf
-        try:
-            print("Attempting PDF generation using wkhtmltopdf...")
-            import subprocess
-            
-            # Check if wkhtmltopdf is installed
-            try:
-                subprocess.run(['wkhtmltopdf', '--version'], check=True, capture_output=True)
-                wkhtmltopdf_available = True
-            except (subprocess.SubprocessError, FileNotFoundError):
-                print("wkhtmltopdf not available, installing...")
-                # Try to install wkhtmltopdf
-                try:
-                    subprocess.run(['apt-get', 'update'], check=True)
-                    subprocess.run(['apt-get', 'install', '-y', 'wkhtmltopdf'], check=True)
-                    wkhtmltopdf_available = True
-                except subprocess.SubprocessError:
-                    print("Failed to install wkhtmltopdf")
-                    wkhtmltopdf_available = False
-            
-            if wkhtmltopdf_available:
-                # Generate PDF using wkhtmltopdf
-                cmd = ['wkhtmltopdf', '--encoding', 'utf-8', html_path, pdf_path]
-                result = subprocess.run(cmd, check=True, capture_output=True)
-                
-                if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 1000:
-                    print(f"PDF successfully generated using wkhtmltopdf: {pdf_path}")
-                    return pdf_path
-                else:
-                    print("wkhtmltopdf did not produce a valid PDF, falling back to WeasyPrint")
-        except Exception as wk_error:
-            print(f"wkhtmltopdf approach failed: {str(wk_error)}")
+        # Skip wkhtmltopdf attempt since it requires sudo permissions
         
         # Try direct string-based rendering instead of file-based
         print("Attempting direct HTML string rendering...")
@@ -240,10 +224,19 @@ def create_modern_pdf(articles, titles, output_filename=None):
             with open(html_path, 'rb') as f:
                 html_bytes = f.read()
                 
+            # Perform aggressive byte-level sanitization
+            sanitized_bytes = bytearray()
+            for i, byte in enumerate(html_bytes):
+                # Skip any problematic bytes
+                if byte >= 128 and i < 100:  # Only in the first 100 bytes
+                    continue
+                # Include all other bytes
+                sanitized_bytes.append(byte)
+            
             # Try to decode with different encodings
             for encoding in ['utf-8', 'latin-1', 'cp1252']:
                 try:
-                    html_content = html_bytes.decode(encoding)
+                    html_content = sanitized_bytes.decode(encoding)
                     print(f"Successfully decoded HTML with {encoding} encoding")
                     break
                 except UnicodeDecodeError:
@@ -251,7 +244,7 @@ def create_modern_pdf(articles, titles, output_filename=None):
             else:
                 # If all decodings fail, use a brute force approach
                 print("All decodings failed, using brute force approach")
-                html_content = html_bytes.decode('utf-8', errors='replace')
+                html_content = sanitized_bytes.decode('utf-8', errors='replace')
             
             # Generate PDF with proper page counter using string-based approach
             document = HTML(string=html_content, base_url=os.path.dirname(html_path)).render(stylesheets=css_list, font_config=font_config)
@@ -287,8 +280,8 @@ def create_modern_pdf(articles, titles, output_filename=None):
                         f_out.write(content[3:])
                         
                 # Check for any problematic bytes at the start
-                if content.startswith(b'\xab'):
-                    print("Found problematic byte 0xAB at start of file, cleaning...")
+                if content[0] >= 128:
+                    print(f"Found problematic byte 0x{content[0]:02X} at start of file, cleaning...")
                     with open(html_path, 'wb') as f_out:
                         # Skip the problematic byte
                         f_out.write(content[1:])
@@ -297,25 +290,20 @@ def create_modern_pdf(articles, titles, output_filename=None):
                 print(f"First 20 bytes of HTML file: {content[:20]}")
             
             # Try with explicit file encoding
-            document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='utf-8').render(stylesheets=css_list, font_config=font_config)
-            
-            # Get actual page count and regenerate with correct total
-            actual_pages = len(document.pages)
-            
-            # Update context with actual page count
-            context['total_pages'] = actual_pages
-            
-            # Re-render HTML with accurate page count
-            html_content = template.render(**context)
-            with open(html_path, 'w', encoding='utf-8') as f:
-                f.write(html_content)
-            
-            # Generate final PDF with explicit encoding
-            document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='utf-8').render(stylesheets=css_list, font_config=font_config)
-            document.write_pdf(pdf_path)
+            try:
+                # Try with a more aggressive approach - completely regenerate the HTML
+                print("Regenerating HTML from template...")
+                html_content = template.render(**context)
+                with open(html_path, 'w', encoding='utf-8') as f:
+                    f.write(html_content)
                 
-            print(f"Modern PDF created with file-based approach: {pdf_path}")
-            return pdf_path
+                document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='utf-8').render(stylesheets=css_list, font_config=font_config)
+                document.write_pdf(pdf_path)
+                    
+                print(f"Modern PDF created with file-based approach: {pdf_path}")
+                return pdf_path
+            except Exception as e:
+                print(f"File-based rendering failed: {str(e)}")
     except UnicodeDecodeError as ude:
         print(f"WeasyPrint encoding error: {str(ude)}")
         print("Trying with different encoding...")
@@ -353,27 +341,8 @@ def create_modern_pdf(articles, titles, output_filename=None):
             except Exception as e3:
                 print(f"Failed after sanitizing HTML: {str(e3)}")
                 
-                # Absolute last resort: Try to use a completely different PDF generation approach
-                try:
-                    print("Attempting PDF generation using pdfkit...")
-                    import pdfkit
-                    
-                    # Try to install wkhtmltopdf if not already installed
-                    try:
-                        import subprocess
-                        subprocess.run(['apt-get', 'update'], check=True)
-                        subprocess.run(['apt-get', 'install', '-y', 'wkhtmltopdf'], check=True)
-                    except:
-                        pass
-                    
-                    # Try to generate PDF using pdfkit
-                    pdfkit.from_file(html_path, pdf_path)
-                    
-                    if os.path.exists(pdf_path) and os.path.getsize(pdf_path) > 1000:
-                        print(f"PDF successfully generated using pdfkit: {pdf_path}")
-                        return pdf_path
-                except Exception as pk_error:
-                    print(f"pdfkit approach failed: {str(pk_error)}")
+                # Skip pdfkit approach since it also requires wkhtmltopdf
+                print("Skipping pdfkit approach as it requires wkhtmltopdf")
                 
                 print("Falling back to HTML export...")
                 return html_path
