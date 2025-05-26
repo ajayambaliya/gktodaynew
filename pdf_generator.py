@@ -227,8 +227,17 @@ def should_filter_block(block, article):
     if ('calendar' in text.lower() and 'folder' in text.lower()) or re.search(r'\d{1,2} [A-Za-z]+ \d{4}', text):
         return True
     
+    # Filter post-meta div content
+    if 'post-meta' in text.lower() or 'post-date' in text.lower() or 'post-categories' in text.lower():
+        return True
+    
     # Filter breadcrumb navigation
-    if 'breadcrumb' in text.lower() or 'itemscope' in text.lower() or 'schema.org' in text.lower():
+    if ('breadcrumb' in text.lower() or 'itemscope' in text.lower() or 'schema.org' in text.lower() or 
+        'itemprop' in text.lower()):
+        return True
+    
+    # Filter any content with fa icons typically used in metadata
+    if 'fa fa-calendar' in text.lower() or 'fa fa-folder' in text.lower():
         return True
     
     return False

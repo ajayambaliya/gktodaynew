@@ -109,19 +109,13 @@ def format_telegram_caption(date, topics=None):
             caption += f"{i}. {topic}\n"
         caption += "\n"
     
-    # Add footer with channel info
-    caption += "<b>✅ DAILY UPDATES FOR:</b>\n"
-    caption += "• UPSC, GPSC, and other competitive exams\n"
-    caption += "• Banking & SSC aspirants\n"
-    caption += "• General Knowledge enthusiasts\n\n"
-    
     # Add call to action
     caption += "<b>📲 JOIN OUR CHANNEL:</b>\n"
     caption += "• @CurrentAdda\n"
     caption += "• Daily Current Affairs updates\n"
     caption += "• Comprehensive coverage in Gujarati & English\n\n"
     
-    caption += "#CurrentAffairs #DailyUpdate #UPSC #GPSC"
+    caption += "#CurrentAffairs #DailyUpdate #UPSC #GPSC #talati"
     
     return caption
 

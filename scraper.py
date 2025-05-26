@@ -7,6 +7,7 @@ from translation import translate_to_gujarati
 import base64
 from config import BASE_URL, PAGE_COUNT
 import random
+import re
 
 def fetch_article_urls(base_url, pages):
     """Fetch article URLs from multiple pages of GKToday current affairs."""
@@ -29,7 +30,7 @@ def fetch_article_urls(base_url, pages):
                     link = h3_tag.find('a')
                     if link and link.get('href'):
                         article_url = link['href']
-                        if article_url not in all_urls:
+                        if article_url not in all_urls and should_include_url(article_url):
                             all_urls.append(article_url)
             
             # Method 2: Find divs with class="home-post-item"
@@ -40,7 +41,7 @@ def fetch_article_urls(base_url, pages):
                     link = h3_tag.find('a')
                     if link and link.get('href'):
                         article_url = link['href']
-                        if article_url not in all_urls:
+                        if article_url not in all_urls and should_include_url(article_url):
                             all_urls.append(article_url)
             
             # Method 3: Look for all h3 elements with links that look like articles
@@ -55,7 +56,8 @@ def fetch_article_urls(base_url, pages):
                         if ('gktoday.in' in article_url and 
                             not article_url.endswith('/') and 
                             '/page/' not in article_url and
-                            article_url not in all_urls):
+                            article_url not in all_urls and
+                            should_include_url(article_url)):
                             all_urls.append(article_url)
             
             print(f"Fetched {len(all_urls)} URLs so far from {page} pages")
@@ -63,6 +65,43 @@ def fetch_article_urls(base_url, pages):
             print(f"Error fetching URLs from page {page}: {str(e)}")
     
     return all_urls
+
+def should_include_url(url):
+    """
+    Check if a URL should be included in scraping.
+    
+    Args:
+        url: The URL to check
+    
+    Returns:
+        bool: True if the URL should be included, False otherwise
+    """
+    # Skip quiz URLs
+    if 'quiz' in url.lower() or 'daily-current-affairs-quiz' in url.lower():
+        return False
+    
+    # Skip category/tag pages
+    if '/category/' in url or '/tag/' in url:
+        return False
+    
+    # Skip archive pages
+    if '/20' in url and url.endswith('/'):  # Year-based archives like /2023/
+        return False
+    
+    # Skip specific URL patterns
+    patterns_to_skip = [
+        r'quiz',
+        r'mcq',
+        r'multiple-choice',
+        r'practice-questions',
+        r'mock-test',
+    ]
+    
+    for pattern in patterns_to_skip:
+        if re.search(pattern, url.lower()):
+            return False
+    
+    return True
 
 def download_and_convert_image(url):
     """Download and convert image to base64 for embedding in HTML."""
@@ -158,6 +197,16 @@ async def scrape_and_get_content(url):
         respond_section = main_content.find(id='respond')
         if respond_section:
             respond_section.decompose()
+            
+        # Remove post-meta sections
+        post_meta_sections = main_content.find_all('div', class_='post-meta')
+        for section in post_meta_sections:
+            section.decompose()
+            
+        # Remove breadcrumb sections
+        breadcrumb_sections = main_content.find_all('div', class_='breadcrumb')
+        for section in breadcrumb_sections:
+            section.decompose()
         
         # Process only the content elements (paragraphs, headings, lists)
         # Skip breadcrumb, post-meta, comments and other non-content elements
@@ -175,7 +224,10 @@ async def scrape_and_get_content(url):
                 # Skip if parent has any of these classes or IDs
                 if parent.get('class'):
                     parent_classes = ' '.join(parent.get('class', []))
-                    if any(cls in parent_classes for cls in ['sharethis', 'related-articles', 'comments', 'comment-respond']):
+                    if any(cls in parent_classes for cls in [
+                        'sharethis', 'related-articles', 'comments', 'comment-respond',
+                        'post-meta', 'breadcrumb'
+                    ]):
                         should_skip = True
                         break
                 
@@ -196,6 +248,13 @@ async def scrape_and_get_content(url):
         for tag in content_elements:
             text = tag.get_text().strip()
             if not text:
+                continue
+            
+            # Skip post-meta and breadcrumb content that might be missed
+            if ('post-date' in text.lower() or 'post-categories' in text.lower() or
+                'breadcrumb' in text.lower() or 'itemscope' in text.lower() or
+                'schema.org' in text.lower() or 'fa fa-calendar' in text.lower() or
+                'fa fa-folder' in text.lower()):
                 continue
             
             translated_text = translate_to_gujarati(text)
@@ -233,14 +292,14 @@ async def get_all_articles(urls, max_articles=5):
     articles = []
     titles = []
     
-    # For testing, get all URLs but only process 1-2 random ones
+    # For testing, get all URLs but only process random ones
     test_mode = True  # Set to False for production
     if test_mode:
-        # Take only 1-2 random articles for testing
+        # Take 8 random articles for testing
         random.shuffle(urls)
-        test_sample = min(2, len(urls))  # 1-2 articles or all if less
+        test_sample = min(8, len(urls))  # 8 articles or all if less
         sample_urls = urls[:test_sample]
-        print(f"TEST MODE: Processing only {test_sample} random articles out of {len(urls)}")
+        print(f"TEST MODE: Processing {test_sample} random articles out of {len(urls)}")
     else:
         # Regular mode - limit to max_articles
         sample_urls = urls[:max_articles]
