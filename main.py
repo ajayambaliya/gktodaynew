@@ -88,7 +88,23 @@ async def main():
                 print(f"Using PDF version instead of HTML: {possible_pdf}")
                 pdf_path = possible_pdf
         
-        print(f"PDF generated successfully: {pdf_path}")
+        # Verify PDF file is valid and not empty
+        if pdf_path.lower().endswith('.pdf'):
+            try:
+                file_size = os.path.getsize(pdf_path)
+                if file_size < 1000:  # Less than 1KB is suspicious for a PDF
+                    print(f"Warning: PDF file is suspiciously small ({file_size} bytes), might be corrupted")
+                    # Fall back to HTML if PDF seems invalid
+                    html_path = file_path if file_path.lower().endswith('.html') else file_path.replace('.pdf', '.html')
+                    if os.path.exists(html_path) and os.path.getsize(html_path) > 1000:
+                        print(f"Falling back to HTML file: {html_path}")
+                        pdf_path = html_path
+                else:
+                    print(f"PDF file verified: {file_size} bytes")
+            except Exception as e:
+                print(f"Error verifying PDF file: {str(e)}")
+        
+        print(f"File to be sent: {pdf_path}")
         
         # Send to Telegram
         success = await send_pdf_to_telegram(pdf_path, topics=titles)

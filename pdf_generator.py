@@ -170,27 +170,72 @@ def create_modern_pdf(articles, titles, output_filename=None):
             """, font_config=font_config)
             css_list.append(fontawesome_css)
         
-        # Generate PDF with proper page counter
-        # Use base_url to resolve relative URLs and encoding to handle non-ASCII characters
-        document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='utf-8').render(stylesheets=css_list, font_config=font_config)
-        
-        # Get actual page count and regenerate with correct total
-        actual_pages = len(document.pages)
-        
-        # Update context with actual page count
-        context['total_pages'] = actual_pages
-        
-        # Re-render HTML with accurate page count
-        html_content = template.render(**context)
-        with open(html_path, 'w', encoding='utf-8') as f:
-            f.write(html_content)
-        
-        # Generate final PDF with explicit encoding
-        document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='utf-8').render(stylesheets=css_list, font_config=font_config)
-        document.write_pdf(pdf_path)
+        # Try direct string-based rendering instead of file-based
+        print("Attempting direct HTML string rendering...")
+        try:
+            # Generate PDF with proper page counter using string-based approach
+            document = HTML(string=html_content, base_url=os.path.dirname(html_path)).render(stylesheets=css_list, font_config=font_config)
             
-        print(f"Modern PDF created: {pdf_path}")
-        return pdf_path
+            # Get actual page count
+            actual_pages = len(document.pages)
+            
+            # Update context with actual page count
+            context['total_pages'] = actual_pages
+            
+            # Re-render HTML with accurate page count
+            html_content = template.render(**context)
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            
+            # Generate final PDF with string-based approach
+            document = HTML(string=html_content, base_url=os.path.dirname(html_path)).render(stylesheets=css_list, font_config=font_config)
+            document.write_pdf(pdf_path)
+                
+            print(f"Modern PDF created using string-based approach: {pdf_path}")
+            return pdf_path
+        except Exception as string_error:
+            print(f"String-based rendering failed: {str(string_error)}")
+            print("Falling back to file-based rendering with encoding handling...")
+            
+            # Check for BOM in the HTML file
+            with open(html_path, 'rb') as f:
+                content = f.read()
+                has_bom = content.startswith(b'\xef\xbb\xbf')
+                if has_bom:
+                    print("Warning: HTML file has BOM marker, removing it...")
+                    with open(html_path, 'wb') as f_out:
+                        f_out.write(content[3:])
+                        
+                # Check for any problematic bytes at the start
+                if content.startswith(b'\xab'):
+                    print("Found problematic byte 0xAB at start of file, cleaning...")
+                    with open(html_path, 'wb') as f_out:
+                        # Skip the problematic byte
+                        f_out.write(content[1:])
+                
+                # Debug: print the first 20 bytes of the file
+                print(f"First 20 bytes of HTML file: {content[:20]}")
+            
+            # Try with explicit file encoding
+            document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='utf-8').render(stylesheets=css_list, font_config=font_config)
+            
+            # Get actual page count and regenerate with correct total
+            actual_pages = len(document.pages)
+            
+            # Update context with actual page count
+            context['total_pages'] = actual_pages
+            
+            # Re-render HTML with accurate page count
+            html_content = template.render(**context)
+            with open(html_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            
+            # Generate final PDF with explicit encoding
+            document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='utf-8').render(stylesheets=css_list, font_config=font_config)
+            document.write_pdf(pdf_path)
+                
+            print(f"Modern PDF created with file-based approach: {pdf_path}")
+            return pdf_path
     except UnicodeDecodeError as ude:
         print(f"WeasyPrint encoding error: {str(ude)}")
         print("Trying with different encoding...")
@@ -202,8 +247,33 @@ def create_modern_pdf(articles, titles, output_filename=None):
             return pdf_path
         except Exception as e2:
             print(f"Failed with alternate encoding: {str(e2)}")
-            print("Falling back to HTML export...")
-            return html_path
+            
+            # Last resort: try to sanitize the HTML file
+            try:
+                print("Attempting to sanitize HTML file...")
+                with open(html_path, 'rb') as f:
+                    content = f.read()
+                
+                # Replace any problematic bytes
+                sanitized = bytearray()
+                for byte in content:
+                    # Skip any non-ASCII control characters except common whitespace
+                    if byte >= 32 or byte in (9, 10, 13):  # tab, newline, carriage return
+                        sanitized.append(byte)
+                
+                # Write sanitized content
+                with open(html_path, 'wb') as f:
+                    f.write(sanitized)
+                
+                # Try one more time with sanitized content
+                document = HTML(filename=html_path, base_url=os.path.dirname(html_path)).render(stylesheets=css_list, font_config=font_config)
+                document.write_pdf(pdf_path)
+                print(f"PDF created after sanitizing HTML: {pdf_path}")
+                return pdf_path
+            except Exception as e3:
+                print(f"Failed after sanitizing HTML: {str(e3)}")
+                print("Falling back to HTML export...")
+                return html_path
     except Exception as e:
         print(f"WeasyPrint error: {str(e)}")
         print("Falling back to HTML export...")
