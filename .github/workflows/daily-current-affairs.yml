@@ -32,5 +32,9 @@ jobs:
       - name: Generate PDF and send to Telegram
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL: ${{ secrets.TELEGRAM_CHANNEL }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          MONGODB_COLLECTION: ${{ secrets.MONGODB_COLLECTION }}
         run: |
           python main.py 
