@@ -78,18 +78,18 @@
             font-weight: var(--font-medium);
         }
         
-        /* Modern Cover Page Styles */
+        /* Modern Cover Page Styles - Enhanced */
         .cover-page {
             background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
             color: white;
             padding: 0;
             margin: 0;
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
             page-break-after: always;
             height: 98vh;
             position: relative;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
             border: 1px solid var(--gray-200);
         }
         
@@ -101,12 +101,27 @@
             flex-direction: column;
         }
         
+        /* Enhanced cover header with subtle pattern */
         .cover-header {
-            padding: 2cm 1cm;
+            padding: 2.5cm 1cm 2cm;
             text-align: center;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(5px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Add subtle pattern to header */
+        .cover-header:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            z-index: -1;
         }
         
         .cover-body {
@@ -114,6 +129,21 @@
             padding: 1cm;
             display: flex;
             flex-direction: column;
+            position: relative;
+        }
+        
+        /* Add subtle pattern to body */
+        .cover-body:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent);
+            background-size: 100px 100px;
+            z-index: -1;
+            opacity: 0.3;
         }
         
         .cover-footer {
@@ -121,14 +151,20 @@
             text-align: center;
             background: rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .main-title {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: var(--font-extrabold);
             margin-bottom: 0.5rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             letter-spacing: 0.05em;
+            background: linear-gradient(to right, #ffffff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
         }
         
         .date {
@@ -136,13 +172,18 @@
             font-weight: var(--font-light);
             letter-spacing: 0.1em;
             opacity: 0.9;
+            margin-top: 0.5rem;
         }
         
         .tagline {
             font-size: var(--text-lg);
-            margin-top: 0.5rem;
+            margin-top: 0.75rem;
             font-style: italic;
             opacity: 0.8;
+            background: rgba(255, 255, 255, 0.1);
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            border-radius: 20px;
         }
         
         .highlights-container {
@@ -153,9 +194,11 @@
         .highlights-title {
             font-size: var(--text-2xl);
             font-weight: var(--font-bold);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             text-align: center;
             position: relative;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
         }
         
         .highlights-title::after {
@@ -170,23 +213,50 @@
             border-radius: 3px;
         }
         
+        /* Improved responsive highlight grid */
         .highlights-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
             margin-top: 1.5rem;
         }
         
+        .highlights-grid.few-items {
+            grid-template-columns: repeat(1, 1fr);
+        }
+        
+        .highlights-grid.medium-items {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .highlights-grid.many-items {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .highlights-grid.extra-many-items {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+        
+        /* Enhanced highlight cards with hover effect */
         .highlight-card {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             border-radius: 10px;
-            padding: 1rem;
+            padding: 0.75rem;
             border-left: 4px solid rgba(255, 255, 255, 0.5);
             font-weight: var(--font-medium);
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        
+        .highlight-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
         
         .highlight-number {
@@ -200,14 +270,25 @@
             margin-right: 0.75rem;
             font-weight: var(--font-bold);
             font-size: var(--text-sm);
+            flex-shrink: 0;
         }
         
+        .highlight-text {
+            font-size: 0.9rem;
+            line-height: 1.3;
+        }
+        
+        /* Enhanced QR section */
         .qr-section {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 2rem;
             margin-top: 1rem;
+            background: rgba(0, 0, 0, 0.15);
+            padding: 1rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         
         .qr-code {
@@ -230,7 +311,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
         
         .telegram-link a {
@@ -245,6 +326,11 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
+        .telegram-link a:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
         .telegram-info {
             font-size: var(--text-sm);
             opacity: 0.8;
@@ -252,7 +338,7 @@
             text-align: center;
         }
         
-        /* Article styles with borders */
+        /* Enhanced Article styles - More Highlights style */
         .modern-article {
             background: var(--bg-primary);
             border-radius: 12px;
@@ -264,11 +350,19 @@
             position: relative;
         }
         
+        /* Anchor for page linking */
+        .article-anchor {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
         .article-header {
             padding: var(--space-4);
             border-bottom: 1px solid var(--gray-200);
-            background-color: var(--bg-secondary);
+            background-color: var(--primary-blue);
             position: relative;
+            color: white;
         }
         
         .article-header::after {
@@ -278,7 +372,7 @@
             left: var(--space-4);
             width: 50px;
             height: 3px;
-            background-color: var(--primary-blue);
+            background-color: white;
             border-radius: 3px;
         }
         
@@ -301,9 +395,14 @@
             font-family: 'Noto Serif Gujarati', 'Hind Vadodara', serif;
             font-size: var(--text-2xl);
             font-weight: var(--font-semibold);
-            color: var(--primary-blue);
+            color: white;
             margin-bottom: var(--space-1);
             line-height: 1.3;
+        }
+        
+        .english-title {
+            color: white;
+            font-weight: var(--font-semibold);
         }
         
         .gujarati-heading {
@@ -311,6 +410,58 @@
             font-weight: var(--font-semibold);
             line-height: 1.4;
             margin-bottom: var(--space-2);
+        }
+        
+        /* Article content with improved styling */
+        .article-content {
+            padding: var(--space-4);
+        }
+        
+        .content-blocks {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+        
+        /* Continuation page styling - More Highlights */
+        .cover-page-continuation {
+            background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
+            color: white;
+            padding: 2cm 1cm;
+            margin: 0;
+            border-radius: 15px;
+            overflow: hidden;
+            page-break-after: always;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .continuation-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .continuation-title {
+            font-size: var(--text-3xl);
+            font-weight: var(--font-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        
+        .continuation-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 3px;
         }
 
         /* Font Awesome for icons */
@@ -322,6 +473,7 @@
             line-height: 1;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            margin-right: 0.5rem;
         }
         
         .fa-telegram:before {
@@ -342,6 +494,104 @@
         
         .fa-file-pdf:before {
             content: "\f1c1";
+        }
+        
+        /* Enhanced channel promotion */
+        .channel-promotion {
+            background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            page-break-inside: avoid;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .channel-promotion:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            z-index: 0;
+        }
+        
+        .channel-promotion-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .channel-promotion-title {
+            font-size: var(--text-2xl);
+            font-weight: var(--font-bold);
+            margin-bottom: 1rem;
+        }
+        
+        .channel-promotion-text {
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+        }
+        
+        .channel-promotion-button {
+            display: inline-block;
+            background: white;
+            color: var(--primary-blue);
+            padding: 0.75rem 2rem;
+            border-radius: 30px;
+            font-weight: var(--font-semibold);
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .channel-promotion-features {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .channel-feature {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: var(--text-sm);
+            display: flex;
+            align-items: center;
+        }
+        
+        .channel-feature-icon {
+            margin-right: 0.5rem;
+        }
+        
+        /* QR code at the end of each article */
+        .article-qr-section {
+            display: none; /* Hide this section */
+        }
+        
+        .article-qr-code {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .article-telegram-info {
+            font-size: 0.9rem;
+            max-width: 250px;
+        }
+        
+        .article-telegram-link {
+            color: var(--primary-blue);
+            font-weight: var(--font-semibold);
+            text-decoration: none;
         }
     </style>
 </head>
@@ -375,16 +625,16 @@
                     {% endif %}
                         {% for title in titles %}
                             {% if loop.index <= 14 %}
-                            <div class="highlight-card">
+                            <a href="#article-{{ loop.index }}" class="highlight-card">
                                 <div class="highlight-number">{{ loop.index }}</div>
                                 <div class="highlight-text">{{ title }}</div>
-                            </div>
+                            </a>
                             {% endif %}
                         {% endfor %}
                     </div>
                     
                     {% if highlight_count > 14 %}
-                    <div style="text-align: center; margin-top: 1rem; font-style: italic;">
+                    <div style="text-align: center; margin-top: 1.5rem; font-style: italic; background: rgba(255, 255, 255, 0.1); padding: 0.5rem; border-radius: 20px; display: inline-block; margin-left: auto; margin-right: auto;">
                         + {{ highlight_count - 14 }} more articles inside
                     </div>
                     {% endif %}
@@ -416,10 +666,10 @@
         <div class="highlights-grid many-items">
             {% for title in titles %}
                 {% if loop.index > 14 %}
-                <div class="highlight-card">
+                <a href="#article-{{ loop.index }}" class="highlight-card">
                     <div class="highlight-number">{{ loop.index }}</div>
                     <div class="highlight-text">{{ title }}</div>
-                </div>
+                </a>
                 {% endif %}
             {% endfor %}
         </div>
@@ -441,6 +691,9 @@
     <div class="container-wide">
         {% for article in articles %}
         <article class="modern-article card-elevated">
+            <!-- Anchor for page linking -->
+            <a id="article-{{ loop.index }}" class="article-anchor"></a>
+            
             <div class="article-header">
                 <h2 class="gujarati-title">{{ article.gujarati_title }}</h2>
                 <h2 class="english-title">{{ article.english_title }}</h2>
