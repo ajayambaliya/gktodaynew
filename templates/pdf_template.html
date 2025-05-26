@@ -743,50 +743,50 @@
     <!-- Articles -->
     <div class="container-wide">
         {% for article in articles %}
-        <article class="modern-article card-elevated">
+        <article class="modern-article card-elevated" style="page-break-before: always; page-break-inside: avoid;">
             <!-- Anchor for page linking -->
             <a id="article-{{ loop.index }}" class="article-anchor"></a>
             
-            <div class="article-header">
+            <div class="article-header" style="page-break-after: avoid;">
                 <h2 class="gujarati-title">{{ article.gujarati_title }}</h2>
                 <h2 class="english-title">{{ article.english_title }}</h2>
             </div>
             
-            <div class="article-content">
+            <div class="article-content" style="page-break-before: avoid; page-break-inside: avoid;">
                 {% if article.image %}
-                <div class="hero-image-container">
+                <div class="hero-image-container" style="page-break-inside: avoid; page-break-after: avoid;">
                     <img class="hero-image" src="{{ article.image }}" alt="Article Image">
                 </div>
                 {% endif %}
                 
-                <div class="content-blocks">
-                    {% for block in article.content %}
-                        {% if block.type == 'paragraph' %}
-                            {% if block.is_gujarati %}
-                            <div class="content-paragraph gujarati-text">{{ block.text }}</div>
-                            {% else %}
-                            <div class="content-paragraph english-text">{{ block.text }}</div>
-                            {% endif %}
-                        {% elif block.type == 'heading_2' or block.type == 'heading_4' %}
-                            {% if block.is_gujarati %}
-                            <div class="content-{{ block.type }} gujarati-heading">{{ block.text }}</div>
-                            {% else %}
-                            <div class="content-{{ block.type }}">{{ block.text }}</div>
-                            {% endif %}
-                        {% elif block.type == 'bullet_list' %}
-                            {% if block.is_gujarati %}
-                            <div class="content-{{ block.type }} gujarati-text">{{ block.text }}</div>
-                            {% else %}
-                            <div class="content-{{ block.type }} english-text">{{ block.text }}</div>
-                            {% endif %}
-                        {% elif block.type == 'numbered_list' %}
-                            {% if block.is_gujarati %}
-                            <div class="content-{{ block.type }} gujarati-text">{{ block.text }}</div>
-                            {% else %}
-                            <div class="content-{{ block.type }} english-text">{{ block.text }}</div>
-                            {% endif %}
+                <div class="content-blocks" style="page-break-before: avoid; page-break-inside: avoid;">
+                {% for block in article.content %}
+                    {% if block.type == 'paragraph' %}
+                        {% if block.is_gujarati %}
+                        <div class="content-paragraph gujarati-text" style="page-break-inside: avoid;">{{ block.text }}</div>
+                        {% else %}
+                        <div class="content-paragraph english-text" style="page-break-inside: avoid;">{{ block.text }}</div>
                         {% endif %}
-                    {% endfor %}
+                    {% elif block.type == 'heading_2' or block.type == 'heading_4' %}
+                        {% if block.is_gujarati %}
+                        <div class="content-{{ block.type }} gujarati-heading" style="page-break-after: avoid;">{{ block.text }}</div>
+                        {% else %}
+                        <div class="content-{{ block.type }}" style="page-break-after: avoid;">{{ block.text }}</div>
+                        {% endif %}
+                    {% elif block.type == 'bullet_list' %}
+                        {% if block.is_gujarati %}
+                        <div class="content-{{ block.type }} gujarati-text" style="page-break-inside: avoid;">{{ block.text }}</div>
+                        {% else %}
+                        <div class="content-{{ block.type }} english-text" style="page-break-inside: avoid;">{{ block.text }}</div>
+                        {% endif %}
+                    {% elif block.type == 'numbered_list' %}
+                        {% if block.is_gujarati %}
+                        <div class="content-{{ block.type }} gujarati-text" style="page-break-inside: avoid;">{{ block.text }}</div>
+                        {% else %}
+                        <div class="content-{{ block.type }} english-text" style="page-break-inside: avoid;">{{ block.text }}</div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
                 </div>
             </div>
         </article>

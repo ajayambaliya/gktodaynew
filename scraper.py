@@ -428,8 +428,24 @@ async def scrape_and_get_content(url):
         
         print(f"  ✓ Final content elements count: {len(content_elements)}")
         
+        # Debug: Print a sample of the content elements
+        if content_elements:
+            print("\nSample of content elements found:")
+            for i, elem in enumerate(content_elements[:3]):  # Show first 3 elements
+                text = elem.get_text().strip()
+                print(f"  Element {i+1} ({elem.name}): {text[:50]}...")
+        else:
+            print("\n⚠️ WARNING: No content elements found!")
+        
         print("• Processing and translating content...")
         numbered_list_counter = 1
+        
+        # Debug: Print article info structure before adding content
+        print(f"\nArticle info before adding content:")
+        print(f"  • Title: {article_info['english_title']}")
+        print(f"  • Image: {'Present' if article_info['image'] else 'None'}")
+        print(f"  • Content blocks: {len(article_info['content'])}")
+
         for tag in content_elements:
             text = tag.get_text().strip()
             if not text:
@@ -491,6 +507,19 @@ async def scrape_and_get_content(url):
                         article_info['content'].append({'type': 'paragraph', 'text': translated_text, 'is_gujarati': True})
                         article_info['content'].append({'type': 'paragraph', 'text': text, 'is_gujarati': False})
                         print(f"  • Added fallback paragraph: {text[:50]}...")
+        else:
+            # Print a summary of content types
+            content_types = {}
+            for block in article_info['content']:
+                block_type = block.get('type', 'unknown')
+                if block_type in content_types:
+                    content_types[block_type] += 1
+                else:
+                    content_types[block_type] = 1
+            
+            print("\nContent summary:")
+            for content_type, count in content_types.items():
+                print(f"  • {content_type}: {count} blocks")
 
         # Connect to MongoDB and save the URL as scraped
         print("• Saving URL to MongoDB...")

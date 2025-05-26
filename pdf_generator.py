@@ -257,7 +257,11 @@ def create_modern_pdf(articles, titles, output_filename=None):
                 html_content = sanitized_bytes.decode('utf-8', errors='replace')
             
             # Generate PDF with proper page counter using string-based approach
-            document = HTML(string=html_content, base_url=os.path.dirname(html_path)).render(stylesheets=css_list, font_config=font_config)
+            document = HTML(string=html_content, base_url=os.path.dirname(html_path)).render(
+                stylesheets=css_list, 
+                font_config=font_config,
+                presentational_hints=True  # Enable presentational hints for better page breaks
+            )
             
             # Get actual page count
             actual_pages = len(document.pages)
@@ -270,8 +274,30 @@ def create_modern_pdf(articles, titles, output_filename=None):
             with open(html_path, 'w', encoding='utf-8') as f:
                 f.write(html_content)
             
+            # Add custom CSS to force page breaks
+            page_break_css = CSS(string="""
+                @page {
+                    margin: 0.5cm;
+                    @bottom-center {
+                        content: counter(page) " of " counter(pages);
+                    }
+                }
+                .modern-article {
+                    page-break-before: always;
+                    page-break-inside: avoid;
+                }
+                .channel-promotion {
+                    page-break-before: always;
+                }
+            """)
+            css_list.append(page_break_css)
+            
             # Generate final PDF with string-based approach
-            document = HTML(string=html_content, base_url=os.path.dirname(html_path)).render(stylesheets=css_list, font_config=font_config)
+            document = HTML(string=html_content, base_url=os.path.dirname(html_path)).render(
+                stylesheets=css_list, 
+                font_config=font_config,
+                presentational_hints=True  # Enable presentational hints for better page breaks
+            )
             document.write_pdf(pdf_path)
                 
             print(f"Modern PDF created using string-based approach: {pdf_path}")
