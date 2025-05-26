@@ -8,30 +8,14 @@ import base64
 from config import BASE_URL, PAGE_COUNT
 import re
 from db_utils import get_mongodb_connection, save_scraped_url, get_all_scraped_urls, is_url_scraped
+import random
 
 def fetch_article_urls(base_url, pages):
     """Fetch article URLs from multiple pages of GKToday current affairs."""
-    # Connect to MongoDB
-    client, collection = get_mongodb_connection()
-    previously_scraped_urls = set()
-    
-    if client is None or collection is None:
-        print("Failed to connect to MongoDB. Proceeding without URL tracking.")
-    else:
-        try:
-            # Get previously scraped URLs from MongoDB
-            previously_scraped_urls = get_all_scraped_urls(collection)
-            print(f"Found {len(previously_scraped_urls)} previously scraped URLs in database")
-        except Exception as e:
-            print(f"Error retrieving scraped URLs: {str(e)}")
-        finally:
-            # Close MongoDB connection after getting the URLs
-            if client is not None:
-                client.close()
-    
     all_urls = []
-    new_urls = []
     
+    # Step 1: First scrape all URLs from the website
+    print(f"Step 1: Scraping URLs from {base_url} (up to {pages} pages)...")
     for page in range(1, pages + 1):
         try:
             page_url = base_url if page == 1 else f"{base_url}page/{page}/"
@@ -52,9 +36,6 @@ def fetch_article_urls(base_url, pages):
                         article_url = link['href']
                         if article_url not in all_urls and should_include_url(article_url):
                             all_urls.append(article_url)
-                            # Check if URL is new
-                            if article_url not in previously_scraped_urls:
-                                new_urls.append(article_url)
             
             # Method 2: Find divs with class="home-post-item"
             home_post_items = soup.find_all('div', class_='home-post-item')
@@ -66,9 +47,6 @@ def fetch_article_urls(base_url, pages):
                         article_url = link['href']
                         if article_url not in all_urls and should_include_url(article_url):
                             all_urls.append(article_url)
-                            # Check if URL is new
-                            if article_url not in previously_scraped_urls:
-                                new_urls.append(article_url)
             
             # Method 3: Look for all h3 elements with links that look like articles
             content_divs = soup.find_all('div')
@@ -85,25 +63,50 @@ def fetch_article_urls(base_url, pages):
                             article_url not in all_urls and
                             should_include_url(article_url)):
                             all_urls.append(article_url)
-                            # Check if URL is new
-                            if article_url not in previously_scraped_urls:
-                                new_urls.append(article_url)
             
-            print(f"Fetched {len(all_urls)} total URLs, {len(new_urls)} new URLs from {page} pages")
+            print(f"Found {len(all_urls)} total URLs after scanning page {page}")
         except Exception as e:
             print(f"Error fetching URLs from page {page}: {str(e)}")
     
-    # If we have new URLs, prioritize them
-    if new_urls:
-        print(f"Found {len(new_urls)} new articles to process")
-        # Return all new URLs we found
-        return new_urls
+    print(f"Step 1 completed: Found {len(all_urls)} total URLs from website")
+    
+    # Step 2: Get all URLs from MongoDB
+    print("Step 2: Getting previously scraped URLs from MongoDB...")
+    client, collection = get_mongodb_connection()
+    previously_scraped_urls = set()
+    
+    if client is None or collection is None:
+        print("Failed to connect to MongoDB. Proceeding without URL filtering.")
+    else:
+        try:
+            # Get previously scraped URLs from MongoDB
+            previously_scraped_urls = get_all_scraped_urls(collection)
+            print(f"Found {len(previously_scraped_urls)} previously scraped URLs in database")
+        except Exception as e:
+            print(f"Error retrieving scraped URLs: {str(e)}")
+        finally:
+            # Close MongoDB connection after getting the URLs
+            if client is not None:
+                client.close()
+    
+    # Step 3: Compare and find unique URLs
+    print("Step 3: Comparing URLs to find unique ones...")
+    unique_urls = []
+    for url in all_urls:
+        if url not in previously_scraped_urls:
+            unique_urls.append(url)
+    
+    print(f"Found {len(unique_urls)} unique URLs not previously scraped")
+    
+    # If we have unique URLs, return them
+    if unique_urls:
+        print(f"Returning {len(unique_urls)} unique URLs for processing")
+        return unique_urls
     else:
         print("No new articles found. Processing some existing articles.")
-        # If no new URLs, return a limited number of existing ones
-        import random
-        # Randomly select 8 articles if all are already scraped
+        # If no unique URLs, return a limited number of random existing ones
         random_urls = random.sample(all_urls, min(8, len(all_urls)))
+        print(f"Returning {len(random_urls)} random existing URLs for processing")
         return random_urls
 
 def should_include_url(url):
@@ -326,6 +329,8 @@ async def scrape_and_get_content(url):
         client, collection = get_mongodb_connection()
         if client is not None and collection is not None:
             try:
+                # Store URL to MongoDB after processing
+                print(f"Saving URL to MongoDB: {url}")
                 save_scraped_url(collection, url)
             except Exception as e:
                 print(f"Error saving URL to MongoDB: {str(e)}")

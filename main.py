@@ -1,7 +1,7 @@
 import asyncio
 import os
 from datetime import datetime
-from config import BASE_URL, PAGE_COUNT, PDF_OUTPUT_DIR, TEMPLATE_DIR
+from config import BASE_URL, PAGE_COUNT, PDF_OUTPUT_DIR, TEMPLATE_DIR, MONGODB_DATABASE, MONGODB_COLLECTION
 from scraper import fetch_article_urls, get_all_articles
 from pdf_generator import create_modern_pdf
 from telegram_sender import send_pdf_to_telegram
@@ -43,13 +43,15 @@ async def main():
         # Check MongoDB connection
         client, collection = get_mongodb_connection()
         if client is None or collection is None:
-            print("Warning: MongoDB connection failed. Proceeding without URL tracking.")
+            print(f"Warning: MongoDB connection failed. Make sure MONGODB_URI is set in .env file and points to a valid MongoDB instance.")
+            print(f"MongoDB database: {MONGODB_DATABASE}, collection: {MONGODB_COLLECTION}")
+            print("Proceeding without URL tracking.")
         else:
+            print(f"MongoDB connection successful. Using database: {MONGODB_DATABASE}, collection: {MONGODB_COLLECTION}")
             client.close()
-            print("MongoDB connection successful.")
         
-        # Fetch article URLs
-        print(f"Fetching article URLs from {BASE_URL} (up to {PAGE_COUNT} pages)...")
+        # Fetch article URLs with the improved workflow
+        print(f"Fetching and comparing article URLs from {BASE_URL} (up to {PAGE_COUNT} pages)...")
         urls = fetch_article_urls(BASE_URL, PAGE_COUNT)
         
         if not urls:

@@ -23,5 +23,6 @@ MONGODB_URI = os.environ.get('MONGODB_URI')
 if not MONGODB_URI:
     print("WARNING: MONGODB_URI environment variable not found. MongoDB features will not work.")
 
+# Fixed database and collection names as per requirements
 MONGODB_DATABASE = 'gktodayappnew'
 MONGODB_COLLECTION = 'scraped_urls' 
