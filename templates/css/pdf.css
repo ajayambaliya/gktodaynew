@@ -297,17 +297,17 @@
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     position: relative;
-    display: flex;
-    flex-direction: column;
+    display: block;
 }
 
 .article-header {
     padding: var(--space-4);
     border-bottom: 1px solid var(--gray-200);
-    background-color: var(--bg-secondary);
+    background-color: var(--primary-blue);
     position: relative;
     page-break-after: avoid !important;
     break-after: avoid !important;
+    color: white;
 }
 
 .article-header::after {
@@ -327,6 +327,7 @@
     page-break-inside: avoid !important;
     page-break-before: avoid !important;
     break-before: avoid !important;
+    display: block;
 }
 
 /* Ensure links in article titles don't use default blue color */
@@ -347,16 +348,16 @@
     font-family: 'Noto Serif Gujarati', 'Hind Vadodara', serif;
     font-size: var(--text-2xl);
     font-weight: var(--font-semibold);
-    color: var(--primary-blue);
+    color: white;
     margin-bottom: var(--space-1);
     line-height: 1.3;
+    display: block;
 }
 
 .english-title {
-    font-size: var(--text-xl);
-    font-weight: var(--font-medium);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-2);
+    color: white;
+    font-weight: var(--font-semibold);
+    display: block;
 }
 
 .hero-image-container {
@@ -373,6 +374,7 @@
     page-break-after: avoid !important;
     break-after: avoid !important;
     max-height: 250px;
+    display: block;
 }
 
 .hero-image {
@@ -380,6 +382,7 @@
     height: auto;
     max-height: 250px;
     object-fit: cover;
+    display: block;
 }
 
 .hero-image-overlay {
@@ -395,7 +398,8 @@
 
 .content-paragraph {
     margin-bottom: var(--space-3);
-    break-inside: avoid;
+    break-inside: avoid !important;
+    display: block;
 }
 
 .gujarati-text {
@@ -663,6 +667,7 @@
     page-break-inside: avoid !important;
     page-break-before: avoid !important;
     break-before: avoid !important;
+    display: block;
 }
 
 /* Ensure article anchor doesn't cause layout issues */

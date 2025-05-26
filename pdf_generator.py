@@ -106,6 +106,16 @@ def create_modern_pdf(articles, titles, output_filename=None):
     # Render HTML
     html_content = template.render(**context)
     
+    # Check if there are any articles with content
+    has_content = False
+    for article in processed_articles:
+        if article.get('content') and len(article.get('content', [])) > 0:
+            has_content = True
+            break
+    
+    if not has_content:
+        print("WARNING: No content found in articles. Check scraper output.")
+    
     # Save HTML file for debugging or fallback
     html_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.html")
     

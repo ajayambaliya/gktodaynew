@@ -353,7 +353,16 @@ async def scrape_and_get_content(url):
         # Skip breadcrumb, post-meta, comments and other non-content elements
         print("• Extracting content elements...")
         content_elements = []
-        for tag in main_content.find_all(['p', 'h2', 'h4', 'ul', 'ol']):
+        
+        # First try to find the article-content div which contains the main content
+        article_content = main_content.find('div', class_='entry-content')
+        if not article_content:
+            article_content = main_content.find('div', class_='post-content')
+        if not article_content:
+            article_content = main_content
+            
+        # Find all content elements within the article content
+        for tag in article_content.find_all(['p', 'h2', 'h4', 'ul', 'ol']):
             # Skip elements inside unwanted sections
             should_skip = False
             
@@ -383,10 +392,41 @@ async def scrape_and_get_content(url):
             
             if should_skip:
                 continue
-            
+                
+            # Skip empty elements or those with very little content
+            text = tag.get_text().strip()
+            if not text or len(text) < 10:
+                continue
+                
             content_elements.append(tag)
         
         print(f"  ✓ Found {len(content_elements)} content elements")
+        
+        # If no content elements were found, try a more aggressive approach
+        if len(content_elements) == 0:
+            print("  ⚠️ No content elements found with standard approach, trying alternative methods...")
+            
+            # Method 1: Try to find any paragraphs directly in the main content
+            all_paragraphs = main_content.find_all('p')
+            if all_paragraphs:
+                print(f"  • Found {len(all_paragraphs)} paragraphs with direct search")
+                content_elements = [p for p in all_paragraphs if len(p.get_text().strip()) > 20]
+                print(f"  • Added {len(content_elements)} meaningful paragraphs")
+            
+            # Method 2: If still no content, look for divs with substantial text
+            if len(content_elements) == 0:
+                print("  • Looking for divs with substantial text...")
+                for div in main_content.find_all('div'):
+                    if div.find_all(['p', 'h2', 'h4', 'ul', 'ol']):
+                        # Skip if this div is likely a container
+                        continue
+                    
+                    text = div.get_text().strip()
+                    if len(text) > 100:  # Only divs with substantial text
+                        content_elements.append(div)
+                        print(f"  • Added div with {len(text)} characters of text")
+        
+        print(f"  ✓ Final content elements count: {len(content_elements)}")
         
         print("• Processing and translating content...")
         numbered_list_counter = 1
@@ -407,28 +447,51 @@ async def scrape_and_get_content(url):
             if tag.name == 'p':
                 article_info['content'].append({'type': 'paragraph', 'text': translated_text, 'is_gujarati': True})
                 article_info['content'].append({'type': 'paragraph', 'text': text, 'is_gujarati': False})
+                print(f"  • Added paragraph: {text[:50]}...")
             elif tag.name == 'h2':
                 article_info['content'].append({'type': 'heading_2', 'text': translated_text, 'is_gujarati': True})
                 article_info['content'].append({'type': 'heading_2', 'text': text, 'is_gujarati': False})
+                print(f"  • Added heading: {text}")
             elif tag.name == 'h4':
                 article_info['content'].append({'type': 'heading_4', 'text': translated_text, 'is_gujarati': True})
                 article_info['content'].append({'type': 'heading_4', 'text': text, 'is_gujarati': False})
+                print(f"  • Added subheading: {text}")
             elif tag.name == 'ul':
                 for li in tag.find_all('li'):
                     li_text = li.get_text().strip()
                     translated_li_text = translate_to_gujarati(li_text)
                     article_info['content'].append({'type': 'bullet_list', 'text': translated_li_text, 'is_gujarati': True})
                     article_info['content'].append({'type': 'bullet_list', 'text': li_text, 'is_gujarati': False})
+                    print(f"  • Added bullet point: {li_text[:50]}...")
             elif tag.name == 'ol':
                 for li in tag.find_all('li'):
                     li_text = li.get_text().strip()
                     translated_li_text = translate_to_gujarati(li_text)
                     article_info['content'].append({'type': 'numbered_list', 'text': translated_li_text, 'number': numbered_list_counter, 'is_gujarati': True})
                     article_info['content'].append({'type': 'numbered_list', 'text': li_text, 'number': numbered_list_counter, 'is_gujarati': False})
+                    print(f"  • Added numbered point {numbered_list_counter}: {li_text[:50]}...")
                     numbered_list_counter += 1
         
         print(f"  ✓ Processed {len(article_info['content'])} content blocks")
         
+        # Debug: Check if content was actually extracted
+        if len(article_info['content']) == 0:
+            print("  ⚠️ WARNING: No content was extracted from this article!")
+            print("  ⚠️ This may indicate a problem with the HTML structure or content selectors.")
+            
+            # Try a more aggressive approach to find content
+            print("  • Attempting more aggressive content extraction...")
+            all_paragraphs = main_content.find_all('p')
+            if all_paragraphs:
+                print(f"  • Found {len(all_paragraphs)} paragraphs with direct search")
+                for p in all_paragraphs[:3]:  # Just add the first few paragraphs as a fallback
+                    text = p.get_text().strip()
+                    if text and len(text) > 20:  # Only meaningful paragraphs
+                        translated_text = translate_to_gujarati(text)
+                        article_info['content'].append({'type': 'paragraph', 'text': translated_text, 'is_gujarati': True})
+                        article_info['content'].append({'type': 'paragraph', 'text': text, 'is_gujarati': False})
+                        print(f"  • Added fallback paragraph: {text[:50]}...")
+
         # Connect to MongoDB and save the URL as scraped
         print("• Saving URL to MongoDB...")
         client, collection = get_mongodb_connection()
