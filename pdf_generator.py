@@ -106,6 +106,11 @@ def create_modern_pdf(articles, titles, output_filename=None):
     # Render HTML
     html_content = template.render(**context)
     
+    # Save HTML file for debugging or fallback
+    html_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.html")
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
     try:
         # Try to import WeasyPrint and generate PDF
         from weasyprint import HTML, CSS
@@ -113,11 +118,6 @@ def create_modern_pdf(articles, titles, output_filename=None):
         
         # Configure fonts
         font_config = FontConfiguration()
-        
-        # Temporary HTML file with absolute paths
-        temp_html_path = os.path.join(PDF_OUTPUT_DIR, f"temp_{output_filename}.html")
-        with open(temp_html_path, 'w', encoding='utf-8') as f:
-            f.write(html_content)
         
         # Get CSS files with absolute paths
         css_files = [
@@ -169,7 +169,7 @@ def create_modern_pdf(articles, titles, output_filename=None):
         
         # Generate PDF with proper page counter
         pdf_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.pdf")
-        document = HTML(filename=temp_html_path).render(stylesheets=css_list, font_config=font_config)
+        document = HTML(filename=html_path).render(stylesheets=css_list, font_config=font_config)
         
         # Get actual page count and regenerate with correct total
         actual_pages = len(document.pages)
@@ -179,16 +179,12 @@ def create_modern_pdf(articles, titles, output_filename=None):
         
         # Re-render HTML with accurate page count
         html_content = template.render(**context)
-        with open(temp_html_path, 'w', encoding='utf-8') as f:
+        with open(html_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
         
         # Generate final PDF
-        document = HTML(filename=temp_html_path).render(stylesheets=css_list, font_config=font_config)
+        document = HTML(filename=html_path).render(stylesheets=css_list, font_config=font_config)
         document.write_pdf(pdf_path)
-        
-        # Clean up temporary file
-        if os.path.exists(temp_html_path):
-            os.remove(temp_html_path)
             
         print(f"Modern PDF created: {pdf_path}")
         return pdf_path
@@ -196,10 +192,7 @@ def create_modern_pdf(articles, titles, output_filename=None):
         print(f"WeasyPrint error: {str(e)}")
         print("Falling back to HTML export...")
         
-        # Save as HTML instead
-        html_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.html")
-        with open(html_path, 'w', encoding='utf-8') as f:
-            f.write(html_content)
+        # Return the HTML path as fallback
         print(f"HTML file created: {html_path}")
         return html_path
 

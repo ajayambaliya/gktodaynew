@@ -10,8 +10,13 @@ def get_mongodb_connection():
         tuple: (client, collection) - MongoDB client and collection objects
     """
     try:
-        # Connect to MongoDB
-        client = pymongo.MongoClient(MONGODB_URI)
+        # Connect to MongoDB using the URI from environment variables
+        # Set serverSelectionTimeoutMS to reduce connection timeout
+        client = pymongo.MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
+        
+        # Ping the server to verify connection
+        client.admin.command('ping')
+        
         db = client[MONGODB_DATABASE]
         collection = db[MONGODB_COLLECTION]
         

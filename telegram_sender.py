@@ -20,19 +20,29 @@ async def send_pdf_to_telegram(file_path, caption=None, topics=None):
     try:
         # Get token from environment variable or config
         bot_token = TELEGRAM_BOT_TOKEN
-        # Current Adda channel ID
-        channel_id = TELEGRAM_CHANNEL
-        
         if not bot_token:
             raise ValueError("Bot token is missing from environment variables")
         
+        # Current Adda channel ID
+        channel_id = TELEGRAM_CHANNEL
+        
         # Check if we have a PDF version of the file
+        pdf_path = file_path
         if file_path.lower().endswith('.html'):
             pdf_path = file_path.replace('.html', '.pdf')
             if os.path.exists(pdf_path):
                 print(f"Found PDF version, using {pdf_path} instead of {file_path}")
                 file_path = pdf_path
         
+        # Ensure the file exists
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+            
+        # Check file size (Telegram limit is 50MB)
+        file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
+        if file_size_mb > 50:
+            print(f"Warning: File size ({file_size_mb:.2f} MB) exceeds Telegram's 50MB limit")
+            
         # Telegram caption limit
         telegram_caption_limit = 1024
         
@@ -48,6 +58,10 @@ async def send_pdf_to_telegram(file_path, caption=None, topics=None):
         
         # Check file type
         is_html = file_path.lower().endswith('.html')
+        file_type = "HTML" if is_html else "PDF"
+        
+        print(f"Sending {file_type} file: {file_path}")
+        print(f"To channel: {channel_id}")
         
         # Send file
         with open(file_path, 'rb') as file:
@@ -80,7 +94,6 @@ async def send_pdf_to_telegram(file_path, caption=None, topics=None):
                     parse_mode="HTML"
                 )
         
-        file_type = "HTML" if is_html else "PDF"
         print(f"{file_type} sent successfully to {channel_id}")
         return True
         

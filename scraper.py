@@ -13,13 +13,21 @@ def fetch_article_urls(base_url, pages):
     """Fetch article URLs from multiple pages of GKToday current affairs."""
     # Connect to MongoDB
     client, collection = get_mongodb_connection()
+    previously_scraped_urls = set()
+    
     if client is None or collection is None:
         print("Failed to connect to MongoDB. Proceeding without URL tracking.")
-        previously_scraped_urls = set()
     else:
-        # Get previously scraped URLs from MongoDB
-        previously_scraped_urls = get_all_scraped_urls(collection)
-        print(f"Found {len(previously_scraped_urls)} previously scraped URLs in database")
+        try:
+            # Get previously scraped URLs from MongoDB
+            previously_scraped_urls = get_all_scraped_urls(collection)
+            print(f"Found {len(previously_scraped_urls)} previously scraped URLs in database")
+        except Exception as e:
+            print(f"Error retrieving scraped URLs: {str(e)}")
+        finally:
+            # Close MongoDB connection
+            if client is not None:
+                client.close()
     
     all_urls = []
     new_urls = []
@@ -85,12 +93,14 @@ def fetch_article_urls(base_url, pages):
         except Exception as e:
             print(f"Error fetching URLs from page {page}: {str(e)}")
     
-    # Close MongoDB connection if it was opened
-    if client is not None:
-        client.close()
-    
-    # Return new URLs first, then previously scraped ones if needed
-    return new_urls + [url for url in all_urls if url not in new_urls]
+    # If we have new URLs, prioritize them
+    if new_urls:
+        print(f"Found {len(new_urls)} new articles to process")
+        return new_urls
+    else:
+        print("No new articles found. Processing some existing articles.")
+        # If no new URLs, return a limited number of existing ones
+        return all_urls[:10]  # Limit to 10 articles if all are already scraped
 
 def should_include_url(url):
     """
@@ -311,8 +321,12 @@ async def scrape_and_get_content(url):
         # Connect to MongoDB and save the URL as scraped
         client, collection = get_mongodb_connection()
         if client is not None and collection is not None:
-            save_scraped_url(collection, url)
-            client.close()
+            try:
+                save_scraped_url(collection, url)
+            except Exception as e:
+                print(f"Error saving URL to MongoDB: {str(e)}")
+            finally:
+                client.close()
         
         return article_info
     except Exception as e:
@@ -323,9 +337,6 @@ async def get_all_articles(urls, max_articles=None):
     """Process multiple articles and return their structured content."""
     articles = []
     titles = []
-    
-    # Connect to MongoDB
-    client, collection = get_mongodb_connection()
     
     # Process all URLs (no random selection)
     # If max_articles is specified, limit to that number
@@ -338,9 +349,5 @@ async def get_all_articles(urls, max_articles=None):
         if article_data:
             articles.append(article_data)
             titles.append(article_data['english_title'])
-    
-    # Close MongoDB connection
-    if client is not None:
-        client.close()
     
     return articles, titles 
