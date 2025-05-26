@@ -30,6 +30,9 @@
         /* Set total pages variable */
         :root {
             --total-pages: {{ total_pages }};
+            --primary-blue: #3b82f6;
+            --primary-blue-light: #60a5fa;
+            --primary-blue-dark: #2563eb;
         }
 
         /* Center text watermark */
@@ -46,7 +49,7 @@
             pointer-events: none;
         }
 
-        /* Page footer */
+        /* Page footer - Fixed position at bottom */
         .page-footer {
             position: fixed;
             bottom: 0;
@@ -63,6 +66,7 @@
             border-top-left-radius: 15px;
             border-top-right-radius: 15px;
             z-index: 1000;
+            margin-bottom: 0;
         }
         
         .page-number::after {
@@ -78,10 +82,10 @@
             font-weight: var(--font-medium);
         }
         
-        /* Modern Cover Page Styles - Enhanced */
+        /* Modern Cover Page Styles - Enhanced with white background */
         .cover-page {
-            background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
-            color: white;
+            background: white;
+            color: #333;
             padding: 0;
             margin: 0;
             border-radius: 15px;
@@ -101,12 +105,12 @@
             flex-direction: column;
         }
         
-        /* Enhanced cover header with subtle pattern */
+        /* Enhanced cover header with blue background */
         .cover-header {
             padding: 2.5cm 1cm 2cm;
             text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
+            background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+            color: white;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
@@ -130,6 +134,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            background: #f8fafc; /* Light gray background */
         }
         
         /* Add subtle pattern to body */
@@ -140,16 +145,17 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.05) 75%, transparent 75%, transparent);
+            background-image: linear-gradient(45deg, rgba(59, 130, 246, 0.03) 25%, transparent 25%, transparent 50%, rgba(59, 130, 246, 0.03) 50%, rgba(59, 130, 246, 0.03) 75%, transparent 75%, transparent);
             background-size: 100px 100px;
             z-index: -1;
-            opacity: 0.3;
+            opacity: 0.5;
         }
         
         .cover-footer {
             padding: 1cm;
             text-align: center;
-            background: rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+            color: white;
             backdrop-filter: blur(5px);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -160,11 +166,7 @@
             margin-bottom: 0.5rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             letter-spacing: 0.05em;
-            background: linear-gradient(to right, #ffffff, #e0e7ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: inline-block;
+            color: white;
         }
         
         .date {
@@ -173,17 +175,19 @@
             letter-spacing: 0.1em;
             opacity: 0.9;
             margin-top: 0.5rem;
+            color: white;
         }
         
         .tagline {
             font-size: var(--text-lg);
             margin-top: 0.75rem;
             font-style: italic;
-            opacity: 0.8;
-            background: rgba(255, 255, 255, 0.1);
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.2);
             display: inline-block;
             padding: 0.25rem 1rem;
             border-radius: 20px;
+            color: white;
         }
         
         .highlights-container {
@@ -199,6 +203,7 @@
             position: relative;
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            color: var(--primary-blue-dark);
         }
         
         .highlights-title::after {
@@ -209,7 +214,7 @@
             transform: translateX(-50%);
             width: 100px;
             height: 3px;
-            background: rgba(255, 255, 255, 0.5);
+            background: var(--primary-blue);
             border-radius: 3px;
         }
         
@@ -240,27 +245,30 @@
         
         /* Enhanced highlight cards with hover effect */
         .highlight-card {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(59, 130, 246, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 10px;
             padding: 0.75rem;
-            border-left: 4px solid rgba(255, 255, 255, 0.5);
+            border-left: 4px solid var(--primary-blue);
             font-weight: var(--font-medium);
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             cursor: pointer;
+            color: #333;
+            text-decoration: none;
         }
         
         .highlight-card:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(59, 130, 246, 0.15);
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
         
         .highlight-number {
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--primary-blue);
+            color: white;
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -285,8 +293,8 @@
             justify-content: center;
             gap: 2rem;
             margin-top: 1rem;
-            background: rgba(0, 0, 0, 0.15);
-            padding: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1.5rem;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
@@ -412,7 +420,7 @@
             margin-bottom: var(--space-2);
         }
         
-        /* Article content with improved styling */
+        /* Article content with improved styling and image layout */
         .article-content {
             padding: var(--space-4);
         }
@@ -421,6 +429,27 @@
             display: flex;
             flex-direction: column;
             gap: var(--space-3);
+        }
+        
+        /* Fix image and content layout */
+        .hero-image-container {
+            margin-bottom: var(--space-4);
+            max-width: 100%;
+            display: inline-block;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .hero-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        /* Prevent page break between image and first paragraph */
+        .hero-image-container + .content-blocks > div:first-child {
+            page-break-before: avoid;
         }
         
         /* Continuation page styling - More Highlights */
@@ -496,12 +525,12 @@
             content: "\f1c1";
         }
         
-        /* Enhanced channel promotion */
+        /* Enhanced channel promotion with Telegram branding */
         .channel-promotion {
-            background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
+            background: linear-gradient(135deg, #27a7e7 0%, #0088cc 100%); /* Telegram brand colors */
             border-radius: 15px;
-            padding: 2rem;
-            margin: 2rem 0;
+            padding: 3rem 2rem;
+            margin: 3rem 0;
             color: white;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             page-break-inside: avoid;
@@ -516,8 +545,12 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff' opacity='0.1'%3E%3Cpath d='M9.78,18.65L10.06,14.42L17.74,7.5C18.08,7.19 17.67,7.04 17.22,7.31L7.74,13.3L3.64,12C2.76,11.75 2.75,11.14 3.84,10.7L19.81,4.54C20.54,4.21 21.24,4.72 20.96,5.84L18.24,18.65C18.05,19.56 17.5,19.78 16.74,19.36L12.6,16.3L10.61,18.23C10.38,18.46 10.19,18.65 9.78,18.65Z'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right -50px bottom -50px;
+            background-size: 250px 250px;
             z-index: 0;
+            opacity: 0.15;
         }
         
         .channel-promotion-content {
@@ -530,26 +563,44 @@
         }
         
         .channel-promotion-title {
-            font-size: var(--text-2xl);
+            font-size: var(--text-3xl);
             font-weight: var(--font-bold);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .telegram-icon {
+            font-size: 2rem;
+            margin-right: 0.75rem;
+            color: white;
         }
         
         .channel-promotion-text {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
             max-width: 600px;
+            font-size: 1.2rem;
+            line-height: 1.6;
         }
         
         .channel-promotion-button {
             display: inline-block;
             background: white;
-            color: var(--primary-blue);
-            padding: 0.75rem 2rem;
+            color: #0088cc;
+            padding: 1rem 2.5rem;
             border-radius: 30px;
-            font-weight: var(--font-semibold);
+            font-weight: var(--font-bold);
+            font-size: 1.1rem;
             text-decoration: none;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .channel-promotion-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
         }
         
         .channel-promotion-features {
@@ -557,20 +608,21 @@
             justify-content: center;
             gap: 1.5rem;
             flex-wrap: wrap;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
         
         .channel-feature {
             background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 20px;
-            font-size: var(--text-sm);
+            font-size: 1rem;
             display: flex;
             align-items: center;
         }
         
         .channel-feature-icon {
             margin-right: 0.5rem;
+            font-size: 1.1rem;
         }
         
         /* QR code at the end of each article */
@@ -703,11 +755,12 @@
                 {% if article.image %}
                 <div class="hero-image-container">
                     <img class="hero-image" src="{{ article.image }}" alt="Article Image">
-                    <div class="hero-image-overlay"></div>
                 </div>
-                {% endif %}
                 
                 <div class="content-blocks">
+                {% else %}
+                <div class="content-blocks">
+                {% endif %}
                     {% for block in article.content %}
                         {% if block.type == 'paragraph' %}
                             {% if block.is_gujarati %}
