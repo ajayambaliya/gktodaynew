@@ -279,17 +279,20 @@ def create_modern_pdf(articles, titles, output_filename=None):
                 @page {
                     size: A4;
                     margin: 1cm;
-                    @bottom-center {
-                        content: counter(page) " of " counter(pages);
-                    }
                 }
                 
-                /* Force each article to start on a new page */
+                /* Force each article to start on a new page but avoid blank pages */
                 div[style*="page-break-before: always"] {
-                    page-break-before: always !important;
+                    page-break-before: auto !important;
                     page-break-inside: avoid !important;
-                    break-before: always !important;
+                    break-before: auto !important;
                     break-inside: avoid !important;
+                }
+                
+                /* First article should start on first page */
+                div[style*="page-break-before: always"]:first-of-type {
+                    page-break-before: avoid !important;
+                    break-before: avoid !important;
                 }
                 
                 /* Table layout to keep content together */
@@ -303,10 +306,10 @@ def create_modern_pdf(articles, titles, output_filename=None):
                     max-height: 180px !important;
                 }
                 
-                /* Channel promotion on new page */
+                /* Channel promotion on new page only if it fits */
                 .channel-promotion {
-                    page-break-before: always !important;
-                    break-before: always !important;
+                    page-break-before: auto !important;
+                    break-before: auto !important;
                 }
                 
                 /* Reduce spacing to fit more content */
@@ -337,7 +340,7 @@ def create_modern_pdf(articles, titles, output_filename=None):
                 font_config=font_config,
                 presentational_hints=True,  # Enable presentational hints for better page breaks
                 optimize_size=('fonts', 'images'),  # Optimize PDF size
-                zoom=0.9  # Slightly reduce zoom to fit more content
+                zoom=0.95  # Slightly reduce zoom to fit more content
             )
             document.write_pdf(pdf_path)
                 
