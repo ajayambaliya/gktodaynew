@@ -9,22 +9,34 @@ from config import BASE_URL, PAGE_COUNT
 import re
 from db_utils import get_mongodb_connection, save_scraped_url, get_all_scraped_urls, is_url_scraped
 import random
+from datetime import datetime
 
 def fetch_article_urls(base_url, pages):
     """Fetch article URLs from multiple pages of GKToday current affairs."""
     all_urls = []
+    start_time = datetime.now()
     
     # Step 1: First scrape all URLs from the website
-    print(f"Step 1: Scraping URLs from {base_url} (up to {pages} pages)...")
+    print(f"\n{'='*80}")
+    print(f"STEP 1: SCRAPING URLS FROM WEBSITE ({start_time.strftime('%H:%M:%S')})")
+    print(f"{'='*80}")
+    print(f"Source: {base_url}")
+    print(f"Pages to scan: {pages}")
+    
     for page in range(1, pages + 1):
+        page_start = datetime.now()
         try:
             page_url = base_url if page == 1 else f"{base_url}page/{page}/"
+            print(f"\nScanning page {page}/{pages}: {page_url}")
+            
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
             response = requests.get(page_url, headers=headers, timeout=20)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, 'html.parser')
+            
+            page_urls = []
             
             # Method 1: Find divs with class="post-data"
             post_data_divs = soup.find_all('div', class_='post-data')
@@ -34,8 +46,8 @@ def fetch_article_urls(base_url, pages):
                     link = h3_tag.find('a')
                     if link and link.get('href'):
                         article_url = link['href']
-                        if article_url not in all_urls and should_include_url(article_url):
-                            all_urls.append(article_url)
+                        if article_url not in all_urls and article_url not in page_urls and should_include_url(article_url):
+                            page_urls.append(article_url)
             
             # Method 2: Find divs with class="home-post-item"
             home_post_items = soup.find_all('div', class_='home-post-item')
@@ -45,8 +57,8 @@ def fetch_article_urls(base_url, pages):
                     link = h3_tag.find('a')
                     if link and link.get('href'):
                         article_url = link['href']
-                        if article_url not in all_urls and should_include_url(article_url):
-                            all_urls.append(article_url)
+                        if article_url not in all_urls and article_url not in page_urls and should_include_url(article_url):
+                            page_urls.append(article_url)
             
             # Method 3: Look for all h3 elements with links that look like articles
             content_divs = soup.find_all('div')
@@ -60,53 +72,117 @@ def fetch_article_urls(base_url, pages):
                         if ('gktoday.in' in article_url and 
                             not article_url.endswith('/') and 
                             '/page/' not in article_url and
-                            article_url not in all_urls and
+                            article_url not in all_urls and 
+                            article_url not in page_urls and
                             should_include_url(article_url)):
-                            all_urls.append(article_url)
+                            page_urls.append(article_url)
             
-            print(f"Found {len(all_urls)} total URLs after scanning page {page}")
+            # Add all new URLs from this page to our master list
+            all_urls.extend(page_urls)
+            
+            # Display progress for this page
+            page_time = (datetime.now() - page_start).total_seconds()
+            print(f"  ✓ Found {len(page_urls)} new URLs on page {page} ({page_time:.1f}s)")
+            if page_urls:
+                for i, url in enumerate(page_urls, 1):
+                    print(f"    {i}. {url}")
+            
         except Exception as e:
-            print(f"Error fetching URLs from page {page}: {str(e)}")
+            print(f"  ✗ Error fetching URLs from page {page}: {str(e)}")
     
-    print(f"Step 1 completed: Found {len(all_urls)} total URLs from website")
+    # Display summary for Step 1
+    step1_time = (datetime.now() - start_time).total_seconds()
+    print(f"\nStep 1 Summary:")
+    print(f"  • Total URLs found: {len(all_urls)}")
+    print(f"  • Time taken: {step1_time:.1f} seconds")
     
     # Step 2: Get all URLs from MongoDB
-    print("Step 2: Getting previously scraped URLs from MongoDB...")
+    step2_start = datetime.now()
+    print(f"\n{'='*80}")
+    print(f"STEP 2: RETRIEVING SCRAPED URLS FROM MONGODB ({step2_start.strftime('%H:%M:%S')})")
+    print(f"{'='*80}")
+    
     client, collection = get_mongodb_connection()
     previously_scraped_urls = set()
     
     if client is None or collection is None:
-        print("Failed to connect to MongoDB. Proceeding without URL filtering.")
+        print("  ✗ Failed to connect to MongoDB. Proceeding without URL filtering.")
     else:
         try:
             # Get previously scraped URLs from MongoDB
             previously_scraped_urls = get_all_scraped_urls(collection)
-            print(f"Found {len(previously_scraped_urls)} previously scraped URLs in database")
+            print(f"  ✓ Successfully retrieved {len(previously_scraped_urls)} previously scraped URLs")
+            
+            # Display some sample URLs from MongoDB (up to 5)
+            if previously_scraped_urls:
+                sample_urls = list(previously_scraped_urls)[:5]
+                print(f"  • Sample URLs from database:")
+                for i, url in enumerate(sample_urls, 1):
+                    print(f"    {i}. {url}")
+                if len(previously_scraped_urls) > 5:
+                    print(f"    ... and {len(previously_scraped_urls) - 5} more")
         except Exception as e:
-            print(f"Error retrieving scraped URLs: {str(e)}")
+            print(f"  ✗ Error retrieving scraped URLs: {str(e)}")
         finally:
             # Close MongoDB connection after getting the URLs
             if client is not None:
                 client.close()
+                print("  • MongoDB connection closed")
+    
+    # Display summary for Step 2
+    step2_time = (datetime.now() - step2_start).total_seconds()
+    print(f"\nStep 2 Summary:")
+    print(f"  • URLs in MongoDB: {len(previously_scraped_urls)}")
+    print(f"  • Time taken: {step2_time:.1f} seconds")
     
     # Step 3: Compare and find unique URLs
-    print("Step 3: Comparing URLs to find unique ones...")
+    step3_start = datetime.now()
+    print(f"\n{'='*80}")
+    print(f"STEP 3: COMPARING URLS TO FIND UNIQUE ONES ({step3_start.strftime('%H:%M:%S')})")
+    print(f"{'='*80}")
+    
     unique_urls = []
     for url in all_urls:
         if url not in previously_scraped_urls:
             unique_urls.append(url)
     
-    print(f"Found {len(unique_urls)} unique URLs not previously scraped")
+    # Display results
+    print(f"  • Total URLs found from website: {len(all_urls)}")
+    print(f"  • URLs already in MongoDB: {len(previously_scraped_urls)}")
+    print(f"  • Unique URLs for processing: {len(unique_urls)}")
+    
+    if unique_urls:
+        print(f"\n  ✓ Found {len(unique_urls)} unique URLs to process:")
+        for i, url in enumerate(unique_urls, 1):
+            print(f"    {i}. {url}")
+    else:
+        print(f"\n  ✗ No new unique URLs found")
+    
+    # Display summary for Step 3
+    step3_time = (datetime.now() - step3_start).total_seconds()
+    print(f"\nStep 3 Summary:")
+    print(f"  • Unique URLs identified: {len(unique_urls)}")
+    print(f"  • Time taken: {step3_time:.1f} seconds")
+    
+    # Final decision
+    total_time = (datetime.now() - start_time).total_seconds()
+    print(f"\n{'='*80}")
+    print(f"FINAL DECISION ({datetime.now().strftime('%H:%M:%S')})")
+    print(f"{'='*80}")
     
     # If we have unique URLs, return them
     if unique_urls:
-        print(f"Returning {len(unique_urls)} unique URLs for processing")
+        print(f"✓ Returning {len(unique_urls)} unique URLs for processing")
+        print(f"• Total processing time: {total_time:.1f} seconds")
         return unique_urls
     else:
-        print("No new articles found. Processing some existing articles.")
+        print("✗ No new articles found. Processing some existing articles instead.")
         # If no unique URLs, return a limited number of random existing ones
         random_urls = random.sample(all_urls, min(8, len(all_urls)))
-        print(f"Returning {len(random_urls)} random existing URLs for processing")
+        print(f"✓ Randomly selected {len(random_urls)} existing URLs for processing:")
+        for i, url in enumerate(random_urls, 1):
+            print(f"  {i}. {url}")
+        print(f"• Total processing time: {total_time:.1f} seconds")
         return random_urls
 
 def should_include_url(url):
@@ -173,12 +249,20 @@ def download_and_convert_image(url):
 
 async def scrape_and_get_content(url):
     """Scrape article content and process it for PDF generation."""
+    start_time = datetime.now()
+    print(f"\n{'='*50}")
+    print(f"PROCESSING ARTICLE: {url}")
+    print(f"Started at: {start_time.strftime('%H:%M:%S')}")
+    print(f"{'='*50}")
+    
     try:
+        print("• Fetching article content...")
         response = requests.get(url, timeout=20)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         
         # Find the main content area with the new structure
+        print("• Locating main content...")
         main_content = soup.find('main', id='main', class_='site-main')
         if not main_content:
             # Fallback to the old structure if new one is not found
@@ -191,10 +275,12 @@ async def scrape_and_get_content(url):
             raise Exception("Heading not found")
         
         # Extract featured image with the new structure
+        print("• Looking for featured image...")
         image_url = None
         featured_img = main_content.find('img', class_='post-featured-image')
         if featured_img and featured_img.get('src'):
             image_url = featured_img['src']
+            print(f"  ✓ Found featured image: {image_url}")
         else:
             # Fallback to old structure
             image_div = soup.find('div', class_='featured_image')
@@ -202,15 +288,26 @@ async def scrape_and_get_content(url):
                 img_tag = image_div.find('img')
                 if img_tag and img_tag.get('src'):
                     image_url = img_tag['src']
+                    print(f"  ✓ Found featured image (fallback): {image_url}")
+            else:
+                print("  ✗ No featured image found")
         
         # Process image if found
         image_data = None
         if image_url:
+            print("• Processing image...")
             image_data = download_and_convert_image(image_url)
+            if image_data:
+                print("  ✓ Image processed successfully")
+            else:
+                print("  ✗ Failed to process image")
         
-        content_list = []
         heading_text = heading.get_text().strip()
+        print(f"• Article title: {heading_text}")
+        
+        print("• Translating title to Gujarati...")
         translated_heading = translate_to_gujarati(heading_text)
+        print("  ✓ Translation complete")
         
         # Add the article header information
         article_info = {
@@ -221,6 +318,7 @@ async def scrape_and_get_content(url):
         }
         
         # Find and remove specific sections to exclude from scraping
+        print("• Cleaning up article content...")
         # 1. Remove ShareThis buttons
         share_buttons = main_content.find_all('div', class_='sharethis-inline-share-buttons')
         for div in share_buttons:
@@ -253,6 +351,7 @@ async def scrape_and_get_content(url):
         
         # Process only the content elements (paragraphs, headings, lists)
         # Skip breadcrumb, post-meta, comments and other non-content elements
+        print("• Extracting content elements...")
         content_elements = []
         for tag in main_content.find_all(['p', 'h2', 'h4', 'ul', 'ol']):
             # Skip elements inside unwanted sections
@@ -286,7 +385,10 @@ async def scrape_and_get_content(url):
                 continue
             
             content_elements.append(tag)
-            
+        
+        print(f"  ✓ Found {len(content_elements)} content elements")
+        
+        print("• Processing and translating content...")
         numbered_list_counter = 1
         for tag in content_elements:
             text = tag.get_text().strip()
@@ -325,38 +427,72 @@ async def scrape_and_get_content(url):
                     article_info['content'].append({'type': 'numbered_list', 'text': li_text, 'number': numbered_list_counter, 'is_gujarati': False})
                     numbered_list_counter += 1
         
+        print(f"  ✓ Processed {len(article_info['content'])} content blocks")
+        
         # Connect to MongoDB and save the URL as scraped
+        print("• Saving URL to MongoDB...")
         client, collection = get_mongodb_connection()
         if client is not None and collection is not None:
             try:
                 # Store URL to MongoDB after processing
-                print(f"Saving URL to MongoDB: {url}")
                 save_scraped_url(collection, url)
+                print(f"  ✓ Successfully saved URL to MongoDB: {url}")
             except Exception as e:
-                print(f"Error saving URL to MongoDB: {str(e)}")
+                print(f"  ✗ Error saving URL to MongoDB: {str(e)}")
             finally:
                 client.close()
+                print("  • MongoDB connection closed")
+        else:
+            print("  ✗ Failed to connect to MongoDB, URL not saved")
+        
+        # Calculate processing time
+        end_time = datetime.now()
+        processing_time = (end_time - start_time).total_seconds()
+        print(f"\nArticle processing completed in {processing_time:.1f} seconds")
+        print(f"Finished at: {end_time.strftime('%H:%M:%S')}")
+        print(f"{'='*50}")
         
         return article_info
     except Exception as e:
-        print(f"Error scraping {url}: {str(e)}")
+        print(f"  ✗ Error scraping article: {str(e)}")
+        print(f"{'='*50}")
         return None
 
 async def get_all_articles(urls, max_articles=None):
     """Process multiple articles and return their structured content."""
+    start_time = datetime.now()
+    print(f"\n{'='*80}")
+    print(f"STARTING ARTICLE PROCESSING ({start_time.strftime('%H:%M:%S')})")
+    print(f"{'='*80}")
+    
     articles = []
     titles = []
     
     # Process all URLs (no random selection)
     # If max_articles is specified, limit to that number
     urls_to_process = urls if not max_articles else urls[:max_articles]
-    print(f"Processing {len(urls_to_process)} articles")
+    print(f"Total URLs to process: {len(urls_to_process)}")
     
-    for url in urls_to_process:
-        print(f"Processing article: {url}")
+    for i, url in enumerate(urls_to_process, 1):
+        print(f"\nProcessing article {i}/{len(urls_to_process)}: {url}")
         article_data = await scrape_and_get_content(url)
         if article_data:
             articles.append(article_data)
             titles.append(article_data['english_title'])
+            print(f"✓ Article {i} processed successfully: {article_data['english_title']}")
+        else:
+            print(f"✗ Failed to process article {i}: {url}")
+    
+    # Calculate processing time
+    end_time = datetime.now()
+    total_time = (end_time - start_time).total_seconds()
+    
+    print(f"\n{'='*80}")
+    print(f"ARTICLE PROCESSING COMPLETE ({end_time.strftime('%H:%M:%S')})")
+    print(f"{'='*80}")
+    print(f"• Total articles processed: {len(articles)} of {len(urls_to_process)}")
+    print(f"• Success rate: {(len(articles)/len(urls_to_process)*100):.1f}%")
+    print(f"• Total processing time: {total_time:.1f} seconds")
+    print(f"• Average time per article: {(total_time/len(urls_to_process)):.1f} seconds")
     
     return articles, titles 
