@@ -171,7 +171,8 @@ def create_modern_pdf(articles, titles, output_filename=None):
             css_list.append(fontawesome_css)
         
         # Generate PDF with proper page counter
-        document = HTML(filename=html_path).render(stylesheets=css_list, font_config=font_config)
+        # Use base_url to resolve relative URLs and encoding to handle non-ASCII characters
+        document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='utf-8').render(stylesheets=css_list, font_config=font_config)
         
         # Get actual page count and regenerate with correct total
         actual_pages = len(document.pages)
@@ -184,12 +185,25 @@ def create_modern_pdf(articles, titles, output_filename=None):
         with open(html_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
         
-        # Generate final PDF
-        document = HTML(filename=html_path).render(stylesheets=css_list, font_config=font_config)
+        # Generate final PDF with explicit encoding
+        document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='utf-8').render(stylesheets=css_list, font_config=font_config)
         document.write_pdf(pdf_path)
             
         print(f"Modern PDF created: {pdf_path}")
         return pdf_path
+    except UnicodeDecodeError as ude:
+        print(f"WeasyPrint encoding error: {str(ude)}")
+        print("Trying with different encoding...")
+        try:
+            # Try with a different encoding
+            document = HTML(filename=html_path, base_url=os.path.dirname(html_path), encoding='latin-1').render(stylesheets=css_list, font_config=font_config)
+            document.write_pdf(pdf_path)
+            print(f"PDF created with alternate encoding: {pdf_path}")
+            return pdf_path
+        except Exception as e2:
+            print(f"Failed with alternate encoding: {str(e2)}")
+            print("Falling back to HTML export...")
+            return html_path
     except Exception as e:
         print(f"WeasyPrint error: {str(e)}")
         print("Falling back to HTML export...")

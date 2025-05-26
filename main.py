@@ -74,11 +74,19 @@ async def main():
         output_filename = f"{date_str}_Current_Affairs"
         
         # Create PDF
-        pdf_path = create_modern_pdf(articles, titles, output_filename)
+        file_path = create_modern_pdf(articles, titles, output_filename)
         
-        if not pdf_path:
+        if not file_path:
             print("Failed to generate PDF.")
             return
+        
+        # Check if we have a PDF version (WeasyPrint might have returned HTML path as fallback)
+        pdf_path = file_path
+        if file_path.lower().endswith('.html'):
+            possible_pdf = file_path.replace('.html', '.pdf')
+            if os.path.exists(possible_pdf):
+                print(f"Using PDF version instead of HTML: {possible_pdf}")
+                pdf_path = possible_pdf
         
         print(f"PDF generated successfully: {pdf_path}")
         
