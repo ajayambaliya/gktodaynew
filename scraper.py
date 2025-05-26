@@ -6,12 +6,24 @@ import os
 from translation import translate_to_gujarati
 import base64
 from config import BASE_URL, PAGE_COUNT
-import random
 import re
+from db_utils import get_mongodb_connection, save_scraped_url, get_all_scraped_urls, is_url_scraped
 
 def fetch_article_urls(base_url, pages):
     """Fetch article URLs from multiple pages of GKToday current affairs."""
+    # Connect to MongoDB
+    client, collection = get_mongodb_connection()
+    if not collection:
+        print("Failed to connect to MongoDB. Proceeding without URL tracking.")
+        previously_scraped_urls = set()
+    else:
+        # Get previously scraped URLs from MongoDB
+        previously_scraped_urls = get_all_scraped_urls(collection)
+        print(f"Found {len(previously_scraped_urls)} previously scraped URLs in database")
+    
     all_urls = []
+    new_urls = []
+    
     for page in range(1, pages + 1):
         try:
             page_url = base_url if page == 1 else f"{base_url}page/{page}/"
@@ -32,6 +44,9 @@ def fetch_article_urls(base_url, pages):
                         article_url = link['href']
                         if article_url not in all_urls and should_include_url(article_url):
                             all_urls.append(article_url)
+                            # Check if URL is new
+                            if article_url not in previously_scraped_urls:
+                                new_urls.append(article_url)
             
             # Method 2: Find divs with class="home-post-item"
             home_post_items = soup.find_all('div', class_='home-post-item')
@@ -43,6 +58,9 @@ def fetch_article_urls(base_url, pages):
                         article_url = link['href']
                         if article_url not in all_urls and should_include_url(article_url):
                             all_urls.append(article_url)
+                            # Check if URL is new
+                            if article_url not in previously_scraped_urls:
+                                new_urls.append(article_url)
             
             # Method 3: Look for all h3 elements with links that look like articles
             content_divs = soup.find_all('div')
@@ -59,12 +77,20 @@ def fetch_article_urls(base_url, pages):
                             article_url not in all_urls and
                             should_include_url(article_url)):
                             all_urls.append(article_url)
+                            # Check if URL is new
+                            if article_url not in previously_scraped_urls:
+                                new_urls.append(article_url)
             
-            print(f"Fetched {len(all_urls)} URLs so far from {page} pages")
+            print(f"Fetched {len(all_urls)} total URLs, {len(new_urls)} new URLs from {page} pages")
         except Exception as e:
             print(f"Error fetching URLs from page {page}: {str(e)}")
     
-    return all_urls
+    # Close MongoDB connection if it was opened
+    if client:
+        client.close()
+    
+    # Return new URLs first, then previously scraped ones if needed
+    return new_urls + [url for url in all_urls if url not in new_urls]
 
 def should_include_url(url):
     """
@@ -282,34 +308,39 @@ async def scrape_and_get_content(url):
                     article_info['content'].append({'type': 'numbered_list', 'text': li_text, 'number': numbered_list_counter, 'is_gujarati': False})
                     numbered_list_counter += 1
         
+        # Connect to MongoDB and save the URL as scraped
+        client, collection = get_mongodb_connection()
+        if collection:
+            save_scraped_url(collection, url)
+            client.close()
+        
         return article_info
     except Exception as e:
         print(f"Error scraping {url}: {str(e)}")
         return None
 
-async def get_all_articles(urls, max_articles=5):
+async def get_all_articles(urls, max_articles=None):
     """Process multiple articles and return their structured content."""
     articles = []
     titles = []
     
-    # For testing, get all URLs but only process random ones
-    test_mode = True  # Set to False for production
-    if test_mode:
-        # Take 8 random articles for testing
-        random.shuffle(urls)
-        test_sample = min(8, len(urls))  # 8 articles or all if less
-        sample_urls = urls[:test_sample]
-        print(f"TEST MODE: Processing {test_sample} random articles out of {len(urls)}")
-    else:
-        # Regular mode - limit to max_articles
-        sample_urls = urls[:max_articles]
-        print(f"Processing up to {len(sample_urls)} articles")
+    # Connect to MongoDB
+    client, collection = get_mongodb_connection()
     
-    for url in sample_urls:
+    # Process all URLs (no random selection)
+    # If max_articles is specified, limit to that number
+    urls_to_process = urls if not max_articles else urls[:max_articles]
+    print(f"Processing {len(urls_to_process)} articles")
+    
+    for url in urls_to_process:
         print(f"Processing article: {url}")
         article_data = await scrape_and_get_content(url)
         if article_data:
             articles.append(article_data)
             titles.append(article_data['english_title'])
+    
+    # Close MongoDB connection
+    if client:
+        client.close()
     
     return articles, titles 

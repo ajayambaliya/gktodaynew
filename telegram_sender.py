@@ -105,8 +105,17 @@ def format_telegram_caption(date, topics=None):
     # Add topics section if topics are provided
     if topics and len(topics) > 0:
         caption += "<b>🔍 TODAY'S HIGHLIGHTS:</b>\n"
-        for i, topic in enumerate(topics[:5], 1):  # Limit to 5 topics to save space
+        
+        # Display first 5 topics
+        max_topics_to_show = 5
+        for i, topic in enumerate(topics[:max_topics_to_show], 1):
             caption += f"{i}. {topic}\n"
+        
+        # Add a note if there are more topics
+        remaining_topics = len(topics) - max_topics_to_show
+        if remaining_topics > 0:
+            caption += f"\n<b>+ {remaining_topics} more articles in the PDF</b>\n"
+        
         caption += "\n"
     
     # Add call to action

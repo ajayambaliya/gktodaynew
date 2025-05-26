@@ -1,8 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CurrentAdda - {{ date }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Affairs PDF</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/pdf.css">
     <style>
         /* Import our modular CSS files */
         @import url('css/base.css');
@@ -24,7 +29,7 @@
         
         /* Set total pages variable */
         :root {
-            --total-pages: "{{ total_pages|default('∞') }}";
+            --total-pages: {{ total_pages }};
         }
 
         /* Center text watermark */
@@ -356,41 +361,81 @@
             <div class="cover-body">
                 <div class="highlights-container">
                     <h2 class="highlights-title">TODAY'S HIGHLIGHTS</h2>
+                    
                     {% set highlight_count = titles|length %}
+                    
                     {% if highlight_count <= 2 %}
                     <div class="highlights-grid few-items">
                     {% elif highlight_count <= 6 %}
                     <div class="highlights-grid medium-items">
-                    {% else %}
+                    {% elif highlight_count <= 14 %}
                     <div class="highlights-grid many-items">
+                    {% else %}
+                    <div class="highlights-grid extra-many-items">
                     {% endif %}
                         {% for title in titles %}
-                        <div class="highlight-card">
-                            <div class="highlight-number">{{ loop.index }}</div>
-                            <div class="highlight-text">{{ title }}</div>
-                        </div>
+                            {% if loop.index <= 14 %}
+                            <div class="highlight-card">
+                                <div class="highlight-number">{{ loop.index }}</div>
+                                <div class="highlight-text">{{ title }}</div>
+                            </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
-                </div>
-                
-                <div class="qr-section">
-                    <div class="qr-code">
-                        <img src="{{ qr_path|default('telegram_qr.png') }}" alt="Telegram QR Code">
-                        <p>Scan to join</p>
-                    </div>
                     
-                    <div class="telegram-link">
-                        <a href="https://t.me/CurrentAdda">Join @CurrentAdda</a>
-                        <p class="telegram-info">Get daily current affairs updates in Gujarati & English</p>
+                    {% if highlight_count > 14 %}
+                    <div style="text-align: center; margin-top: 1rem; font-style: italic;">
+                        + {{ highlight_count - 14 }} more articles inside
                     </div>
+                    {% endif %}
                 </div>
             </div>
             
             <div class="cover-footer">
-                <p>Comprehensive coverage for UPSC, GPSC, Banking & SSC aspirants</p>
+                <div class="qr-section">
+                    <div class="qr-code">
+                        <img src="telegram_qr.png" alt="Telegram QR Code">
+                        <div>Scan to join</div>
+                    </div>
+                    <div class="telegram-link">
+                        <a href="https://t.me/CurrentAdda">Join @CurrentAdda</a>
+                        <div class="telegram-info">Get daily current affairs updates in Gujarati & English</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    
+    <!-- Cover Page Continuation (if needed) -->
+    {% if titles|length > 14 %}
+    <div class="cover-page-continuation">
+        <div class="continuation-header">
+            <h2 class="continuation-title">MORE HIGHLIGHTS</h2>
+        </div>
+        
+        <div class="highlights-grid many-items">
+            {% for title in titles %}
+                {% if loop.index > 14 %}
+                <div class="highlight-card">
+                    <div class="highlight-number">{{ loop.index }}</div>
+                    <div class="highlight-text">{{ title }}</div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <div class="qr-section">
+            <div class="qr-code">
+                <img src="telegram_qr.png" alt="Telegram QR Code">
+                <div>Scan to join</div>
+            </div>
+            <div class="telegram-link">
+                <a href="https://t.me/CurrentAdda">Join @CurrentAdda</a>
+                <div class="telegram-info">Comprehensive coverage for UPSC, GPSC, Banking & SSC aspirants</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     <!-- Articles -->
     <div class="container-wide">

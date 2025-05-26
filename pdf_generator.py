@@ -87,6 +87,10 @@ def create_modern_pdf(articles, titles, output_filename=None):
     # A rough estimate based on content size
     total_pages = estimate_total_pages(processed_articles)
     
+    # Add 1 extra page if we need a continuation page for many articles
+    if len(titles) > 14:
+        total_pages += 1
+    
     # Prepare context data for the template with absolute paths
     current_date = datetime.now().strftime('%d %B %Y')
     context = {
