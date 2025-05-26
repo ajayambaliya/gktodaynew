@@ -277,26 +277,67 @@ def create_modern_pdf(articles, titles, output_filename=None):
             # Add custom CSS to force page breaks
             page_break_css = CSS(string="""
                 @page {
-                    margin: 0.5cm;
+                    size: A4;
+                    margin: 1cm;
                     @bottom-center {
                         content: counter(page) " of " counter(pages);
                     }
                 }
-                .modern-article {
-                    page-break-before: always;
-                    page-break-inside: avoid;
+                
+                /* Force each article to start on a new page */
+                div[style*="page-break-before: always"] {
+                    page-break-before: always !important;
+                    page-break-inside: avoid !important;
+                    break-before: always !important;
+                    break-inside: avoid !important;
                 }
+                
+                /* Table layout to keep content together */
+                table {
+                    page-break-inside: avoid !important;
+                    break-inside: avoid !important;
+                }
+                
+                /* Ensure images don't cause page breaks */
+                img {
+                    max-height: 180px !important;
+                }
+                
+                /* Channel promotion on new page */
                 .channel-promotion {
-                    page-break-before: always;
+                    page-break-before: always !important;
+                    break-before: always !important;
+                }
+                
+                /* Reduce spacing to fit more content */
+                td {
+                    padding: 5px !important;
+                }
+                
+                /* Smaller font sizes */
+                div {
+                    font-size: 10pt !important;
+                }
+                
+                h2 {
+                    font-size: 14pt !important;
+                    margin-bottom: 5px !important;
+                }
+                
+                h3 {
+                    font-size: 12pt !important;
+                    margin-top: 5px !important;
                 }
             """)
             css_list.append(page_break_css)
             
-            # Generate final PDF with string-based approach
+            # Generate final PDF with string-based approach using a different renderer configuration
             document = HTML(string=html_content, base_url=os.path.dirname(html_path)).render(
                 stylesheets=css_list, 
                 font_config=font_config,
-                presentational_hints=True  # Enable presentational hints for better page breaks
+                presentational_hints=True,  # Enable presentational hints for better page breaks
+                optimize_size=('fonts', 'images'),  # Optimize PDF size
+                zoom=0.9  # Slightly reduce zoom to fit more content
             )
             document.write_pdf(pdf_path)
                 

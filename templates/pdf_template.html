@@ -650,59 +650,49 @@
 </head>
 <body>
     <!-- Center text watermark that appears on every page -->
-    <div class="text-watermark">{{ watermark_text }}</div>
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 6rem; color: rgba(37, 99, 235, 0.06); font-weight: 800; white-space: nowrap; z-index: -1; pointer-events: none;">{{ watermark_text }}</div>
     
     <!-- Cover Page -->
-    <div class="cover-page">
-        <div class="cover-page-content">
-            <div class="cover-header">
-                <h1 class="main-title">CurrentAdda</h1>
-                <p class="date">{{ date }}</p>
-                <p class="tagline">Daily Current Affairs for Competitive Exams</p>
+    <div style="background: white; color: #333; padding: 0; margin: 0; border-radius: 15px; overflow: hidden; page-break-after: always; height: 98vh; position: relative; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); border: 1px solid #e2e8f0;">
+        <div style="position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column;">
+            <div style="padding: 2.5cm 1cm 2cm; text-align: center; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); color: white; border-bottom: 1px solid rgba(255, 255, 255, 0.2); position: relative; overflow: hidden;">
+                <h1 style="font-size: 4rem; font-weight: 800; margin-bottom: 0.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); letter-spacing: 0.05em; color: white;">CurrentAdda</h1>
+                <p style="font-size: 1.25rem; font-weight: 300; letter-spacing: 0.1em; opacity: 0.9; margin-top: 0.5rem; color: white;">{{ date }}</p>
+                <p style="font-size: 1.125rem; margin-top: 0.75rem; font-style: italic; opacity: 0.9; background: rgba(255, 255, 255, 0.2); display: inline-block; padding: 0.25rem 1rem; border-radius: 20px; color: white;">Daily Current Affairs for Competitive Exams</p>
             </div>
             
-            <div class="cover-body">
-                <div class="highlights-container">
-                    <h2 class="highlights-title">TODAY'S HIGHLIGHTS</h2>
+            <div style="flex: 1; padding: 1cm; display: flex; flex-direction: column; position: relative; background: #f8fafc;">
+                <div style="margin-top: 1cm;">
+                    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center; position: relative; text-transform: uppercase; letter-spacing: 0.1em; color: #2563eb;">TODAY'S HIGHLIGHTS</h2>
                     
-                    {% set highlight_count = titles|length %}
-                    
-                    {% if highlight_count <= 2 %}
-                    <div class="highlights-grid few-items">
-                    {% elif highlight_count <= 6 %}
-                    <div class="highlights-grid medium-items">
-                    {% elif highlight_count <= 14 %}
-                    <div class="highlights-grid many-items">
-                    {% else %}
-                    <div class="highlights-grid extra-many-items">
-                    {% endif %}
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
                         {% for title in titles %}
                             {% if loop.index <= 14 %}
-                            <a href="#article-{{ loop.index }}" class="highlight-card">
-                                <div class="highlight-number">{{ loop.index }}</div>
-                                <div class="highlight-text">{{ title }}</div>
+                            <a href="#article-{{ loop.index }}" style="background: rgba(59, 130, 246, 0.1); border-radius: 10px; padding: 0.75rem; border-left: 4px solid #3b82f6; font-weight: 500; display: flex; align-items: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); color: #333; text-decoration: none;">
+                                <div style="background: #3b82f6; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem; font-weight: 700; font-size: 0.875rem; flex-shrink: 0;">{{ loop.index }}</div>
+                                <div style="font-size: 0.9rem; line-height: 1.3;">{{ title }}</div>
                             </a>
                             {% endif %}
                         {% endfor %}
                     </div>
                     
-                    {% if highlight_count > 14 %}
+                    {% if titles|length > 14 %}
                     <div style="text-align: center; margin-top: 1.5rem; font-style: italic; background: rgba(255, 255, 255, 0.1); padding: 0.5rem; border-radius: 20px; display: inline-block; margin-left: auto; margin-right: auto;">
-                        + {{ highlight_count - 14 }} more articles inside
+                        + {{ titles|length - 14 }} more articles inside
                     </div>
                     {% endif %}
                 </div>
             </div>
             
-            <div class="cover-footer">
-                <div class="qr-section">
-                    <div class="qr-code">
-                        <img src="telegram_qr.png" alt="Telegram QR Code">
+            <div style="padding: 1cm; text-align: center; background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%); color: white; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-top: 1rem; background: rgba(255, 255, 255, 0.2); padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                        <img src="telegram_qr.png" alt="Telegram QR Code" style="width: 120px; height: 120px; border-radius: 10px; background: white; padding: 0.5rem; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);">
                         <div>Scan to join</div>
                     </div>
-                    <div class="telegram-link">
-                        <a href="https://t.me/CurrentAdda">Join @CurrentAdda</a>
-                        <div class="telegram-info">Get daily current affairs updates in Gujarati & English</div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+                        <a href="https://t.me/CurrentAdda" style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; background: rgba(255, 255, 255, 0.2); border-radius: 30px; display: inline-block; font-weight: 500; border: 1px solid rgba(255, 255, 255, 0.3);">Join @CurrentAdda</a>
+                        <div style="font-size: 0.875rem; opacity: 0.8; max-width: 250px; text-align: center;">Get daily current affairs updates in Gujarati & English</div>
                     </div>
                 </div>
             </div>
@@ -711,30 +701,30 @@
     
     <!-- Cover Page Continuation (if needed) -->
     {% if titles|length > 14 %}
-    <div class="cover-page-continuation">
-        <div class="continuation-header">
-            <h2 class="continuation-title">MORE HIGHLIGHTS</h2>
+    <div style="background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%); color: white; padding: 2cm 1cm; margin: 0; border-radius: 15px; overflow: hidden; page-break-after: always; position: relative; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); border: 1px solid #e2e8f0;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="font-size: 1.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; position: relative; display: inline-block; margin-bottom: 1.5rem;">MORE HIGHLIGHTS</h2>
         </div>
         
-        <div class="highlights-grid many-items">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
             {% for title in titles %}
                 {% if loop.index > 14 %}
-                <a href="#article-{{ loop.index }}" class="highlight-card">
-                    <div class="highlight-number">{{ loop.index }}</div>
-                    <div class="highlight-text">{{ title }}</div>
+                <a href="#article-{{ loop.index }}" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 10px; padding: 0.75rem; border-left: 4px solid rgba(255, 255, 255, 0.5); font-weight: 500; display: flex; align-items: center; color: white; text-decoration: none;">
+                    <div style="background: rgba(255, 255, 255, 0.2); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 0.75rem; font-weight: 700; font-size: 0.875rem;">{{ loop.index }}</div>
+                    <div style="font-size: 0.9rem; line-height: 1.3;">{{ title }}</div>
                 </a>
                 {% endif %}
             {% endfor %}
         </div>
         
-        <div class="qr-section">
-            <div class="qr-code">
-                <img src="telegram_qr.png" alt="Telegram QR Code">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; margin-top: 2rem; background: rgba(255, 255, 255, 0.2); padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <img src="telegram_qr.png" alt="Telegram QR Code" style="width: 120px; height: 120px; border-radius: 10px; background: white; padding: 0.5rem; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);">
                 <div>Scan to join</div>
             </div>
-            <div class="telegram-link">
-                <a href="https://t.me/CurrentAdda">Join @CurrentAdda</a>
-                <div class="telegram-info">Comprehensive coverage for UPSC, GPSC, Banking & SSC aspirants</div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+                <a href="https://t.me/CurrentAdda" style="color: white; text-decoration: none; padding: 0.75rem 1.5rem; background: rgba(255, 255, 255, 0.2); border-radius: 30px; display: inline-block; font-weight: 500; border: 1px solid rgba(255, 255, 255, 0.3);">Join @CurrentAdda</a>
+                <div style="font-size: 0.875rem; opacity: 0.8; max-width: 250px; text-align: center;">Comprehensive coverage for UPSC, GPSC, Banking & SSC aspirants</div>
             </div>
         </div>
     </div>
@@ -743,108 +733,130 @@
     <!-- Articles -->
     <div class="container-wide">
         {% for article in articles %}
-        <article class="modern-article card-elevated" style="page-break-before: always; page-break-inside: avoid;">
+        <div style="page-break-before: always; page-break-inside: avoid; margin-bottom: 30px;">
             <!-- Anchor for page linking -->
-            <a id="article-{{ loop.index }}" class="article-anchor"></a>
+            <a id="article-{{ loop.index }}" style="display: block; position: relative; top: -20px; visibility: hidden;"></a>
             
-            <div class="article-header" style="page-break-after: avoid;">
-                <h2 class="gujarati-title">{{ article.gujarati_title }}</h2>
-                <h2 class="english-title">{{ article.english_title }}</h2>
-            </div>
-            
-            <div class="article-content" style="page-break-before: avoid; page-break-inside: avoid;">
+            <table style="width: 100%; border-collapse: collapse; border: none;">
+                <tr>
+                    <td style="background-color: #3b82f6; color: white; padding: 15px; border-radius: 10px 10px 0 0;">
+                        <h2 style="font-family: 'Noto Serif Gujarati', serif; margin: 0; padding: 0;">{{ article.gujarati_title }}</h2>
+                        <h3 style="margin: 5px 0 0 0; padding: 0;">{{ article.english_title }}</h3>
+                    </td>
+                </tr>
+                
                 {% if article.image %}
-                <div class="hero-image-container" style="page-break-inside: avoid; page-break-after: avoid;">
-                    <img class="hero-image" src="{{ article.image }}" alt="Article Image">
-                </div>
+                <tr>
+                    <td style="padding: 10px 0;">
+                        <img src="{{ article.image }}" alt="Article Image" style="width: 100%; max-height: 180px; object-fit: cover; display: block;">
+                    </td>
+                </tr>
                 {% endif %}
                 
-                <div class="content-blocks" style="page-break-before: avoid; page-break-inside: avoid;">
-                {% for block in article.content %}
-                    {% if block.type == 'paragraph' %}
-                        {% if block.is_gujarati %}
-                        <div class="content-paragraph gujarati-text" style="page-break-inside: avoid;">{{ block.text }}</div>
-                        {% else %}
-                        <div class="content-paragraph english-text" style="page-break-inside: avoid;">{{ block.text }}</div>
-                        {% endif %}
-                    {% elif block.type == 'heading_2' or block.type == 'heading_4' %}
-                        {% if block.is_gujarati %}
-                        <div class="content-{{ block.type }} gujarati-heading" style="page-break-after: avoid;">{{ block.text }}</div>
-                        {% else %}
-                        <div class="content-{{ block.type }}" style="page-break-after: avoid;">{{ block.text }}</div>
-                        {% endif %}
-                    {% elif block.type == 'bullet_list' %}
-                        {% if block.is_gujarati %}
-                        <div class="content-{{ block.type }} gujarati-text" style="page-break-inside: avoid;">{{ block.text }}</div>
-                        {% else %}
-                        <div class="content-{{ block.type }} english-text" style="page-break-inside: avoid;">{{ block.text }}</div>
-                        {% endif %}
-                    {% elif block.type == 'numbered_list' %}
-                        {% if block.is_gujarati %}
-                        <div class="content-{{ block.type }} gujarati-text" style="page-break-inside: avoid;">{{ block.text }}</div>
-                        {% else %}
-                        <div class="content-{{ block.type }} english-text" style="page-break-inside: avoid;">{{ block.text }}</div>
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-                </div>
-            </div>
-        </article>
+                <tr>
+                    <td style="padding: 0 10px;">
+                        {% for block in article.content %}
+                            {% if block.type == 'paragraph' %}
+                                {% if block.is_gujarati %}
+                                <div style="font-family: 'Noto Serif Gujarati', serif; background-color: #f8fafc; border-left: 3px solid #3b82f6; padding: 10px; margin-bottom: 10px; border-radius: 6px;">{{ block.text }}</div>
+                                {% else %}
+                                <div style="padding: 10px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 6px;">{{ block.text }}</div>
+                                {% endif %}
+                            {% elif block.type == 'heading_2' or block.type == 'heading_4' %}
+                                {% if block.is_gujarati %}
+                                <div style="font-family: 'Noto Serif Gujarati', serif; font-weight: bold; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #3b82f6; padding-bottom: 5px;">{{ block.text }}</div>
+                                {% else %}
+                                <div style="font-weight: bold; margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #3b82f6; padding-bottom: 5px;">{{ block.text }}</div>
+                                {% endif %}
+                            {% elif block.type == 'bullet_list' %}
+                                {% if block.is_gujarati %}
+                                <div style="font-family: 'Noto Serif Gujarati', serif; background-color: #f8fafc; border-left: 3px solid #3b82f6; padding: 10px; margin-bottom: 10px; border-radius: 6px; position: relative; padding-left: 25px;">
+                                    <span style="position: absolute; left: 10px;">•</span>
+                                    {{ block.text }}
+                                </div>
+                                {% else %}
+                                <div style="padding: 10px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 6px; position: relative; padding-left: 25px;">
+                                    <span style="position: absolute; left: 10px;">•</span>
+                                    {{ block.text }}
+                                </div>
+                                {% endif %}
+                            {% elif block.type == 'numbered_list' %}
+                                {% if block.is_gujarati %}
+                                <div style="font-family: 'Noto Serif Gujarati', serif; background-color: #f8fafc; border-left: 3px solid #3b82f6; padding: 10px; margin-bottom: 10px; border-radius: 6px; position: relative; padding-left: 25px;">
+                                    <span style="position: absolute; left: 10px;">{{ block.number }}</span>
+                                    {{ block.text }}
+                                </div>
+                                {% else %}
+                                <div style="padding: 10px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 6px; position: relative; padding-left: 25px;">
+                                    <span style="position: absolute; left: 10px;">{{ block.number }}</span>
+                                    {{ block.text }}
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            </table>
+        </div>
         {% endfor %}
         
         <!-- Channel Promotion -->
-        <div class="channel-promotion">
-            <div class="channel-promotion-content">
-                <h3 class="channel-promotion-title">
-                    <span class="fa fa-telegram telegram-icon"></span>
-                    Join Our Telegram Channel
-                </h3>
-                <p class="channel-promotion-text">
-                    Stay updated with the latest current affairs delivered daily to your device.
-                    Join thousands of aspirants who trust CurrentAdda for their exam preparation.
-                </p>
-                <a href="https://t.me/CurrentAdda" class="channel-promotion-button">
-                    Join @CurrentAdda
-                </a>
-                
-                <div class="channel-promotion-features">
-                    <div class="channel-feature">
-                        <span class="fa fa-check channel-feature-icon"></span>
-                        Daily Updates
-                    </div>
-                    <div class="channel-feature">
-                        <span class="fa fa-language channel-feature-icon"></span>
-                        Bilingual Content
-                    </div>
-                    <div class="channel-feature">
-                        <span class="fa fa-file-pdf channel-feature-icon"></span>
-                        PDF Downloads
-                    </div>
-                    <div class="channel-feature">
-                        <span class="fa fa-clock channel-feature-icon"></span>
-                        Timely Alerts
-                    </div>
-                </div>
-            </div>
+        <div style="page-break-before: always; page-break-inside: avoid; margin-top: 30px;">
+            <table style="width: 100%; border-collapse: collapse; border: none; background: linear-gradient(135deg, #27a7e7 0%, #0088cc 100%); border-radius: 12px; color: white;">
+                <tr>
+                    <td style="padding: 20px; text-align: center;">
+                        <h3 style="font-size: 24px; margin-bottom: 15px;">
+                            <span style="font-family: FontAwesome; margin-right: 10px;">&#xf2c6;</span>
+                            Join Our Telegram Channel
+                        </h3>
+                        <p style="font-size: 16px; margin-bottom: 20px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                            Stay updated with the latest current affairs delivered daily to your device.
+                            Join thousands of aspirants who trust CurrentAdda for their exam preparation.
+                        </p>
+                        <a href="https://t.me/CurrentAdda" style="display: inline-block; background: white; color: #0088cc; padding: 10px 20px; border-radius: 30px; font-weight: bold; text-decoration: none; margin-bottom: 20px;">
+                            Join @CurrentAdda
+                        </a>
+                        
+                        <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
+                            <div style="background: rgba(255, 255, 255, 0.2); padding: 8px 15px; border-radius: 20px;">
+                                <span style="font-family: FontAwesome; margin-right: 5px;">&#xf00c;</span>
+                                Daily Updates
+                            </div>
+                            <div style="background: rgba(255, 255, 255, 0.2); padding: 8px 15px; border-radius: 20px;">
+                                <span style="font-family: FontAwesome; margin-right: 5px;">&#xf1ab;</span>
+                                Bilingual Content
+                            </div>
+                            <div style="background: rgba(255, 255, 255, 0.2); padding: 8px 15px; border-radius: 20px;">
+                                <span style="font-family: FontAwesome; margin-right: 5px;">&#xf1c1;</span>
+                                PDF Downloads
+                            </div>
+                            <div style="background: rgba(255, 255, 255, 0.2); padding: 8px 15px; border-radius: 20px;">
+                                <span style="font-family: FontAwesome; margin-right: 5px;">&#xf017;</span>
+                                Timely Alerts
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
     
-    <div class="section-divider"></div>
+    <div style="height: 1px; background: #e2e8f0; margin: 30px 0; position: relative;"></div>
     
-    <div class="footer">
-        <p>© {{ current_year }} CurrentAdda - Daily Current Affairs</p>
-        <p>Join our Telegram channel: <a href="https://t.me/CurrentAdda">@CurrentAdda</a></p>
+    <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px; text-align: center; padding-bottom: 50px;">
+        <p style="color: #64748b; font-size: 12px;">© {{ current_year }} CurrentAdda - Daily Current Affairs</p>
+        <p style="color: #64748b; font-size: 12px;">Join our Telegram channel: <a href="https://t.me/CurrentAdda" style="color: #3b82f6; text-decoration: none;">@CurrentAdda</a></p>
     </div>
 
     <!-- Page footer that appears on every page -->
-    <div class="page-footer">
-        <div class="page-footer-logo">
+    <div style="position: fixed; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%); color: white; font-size: 12px; border-top-left-radius: 15px; border-top-right-radius: 15px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px;">
+        <div style="font-weight: bold; letter-spacing: 1px;">
             CurrentAdda By Ajay Ambaliya
-            <a href="https://t.me/CurrentAdda">
-                <span class="fa fa-telegram telegram-icon"></span>
+            <a href="https://t.me/CurrentAdda" style="color: white; text-decoration: none;">
+                <span style="font-family: FontAwesome;">&#xf2c6;</span>
             </a>
         </div>
-        <div class="page-footer-date">{{ date }} - Page <span class="page-number"></span></div>
+        <div style="font-weight: 500;">{{ date }} - Page <span class="page-number"></span></div>
     </div>
 </body>
 </html> 
