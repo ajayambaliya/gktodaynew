@@ -13,7 +13,7 @@ def fetch_article_urls(base_url, pages):
     """Fetch article URLs from multiple pages of GKToday current affairs."""
     # Connect to MongoDB
     client, collection = get_mongodb_connection()
-    if not collection:
+    if client is None or collection is None:
         print("Failed to connect to MongoDB. Proceeding without URL tracking.")
         previously_scraped_urls = set()
     else:
@@ -86,7 +86,7 @@ def fetch_article_urls(base_url, pages):
             print(f"Error fetching URLs from page {page}: {str(e)}")
     
     # Close MongoDB connection if it was opened
-    if client:
+    if client is not None:
         client.close()
     
     # Return new URLs first, then previously scraped ones if needed
@@ -310,7 +310,7 @@ async def scrape_and_get_content(url):
         
         # Connect to MongoDB and save the URL as scraped
         client, collection = get_mongodb_connection()
-        if collection:
+        if client is not None and collection is not None:
             save_scraped_url(collection, url)
             client.close()
         
@@ -340,7 +340,7 @@ async def get_all_articles(urls, max_articles=None):
             titles.append(article_data['english_title'])
     
     # Close MongoDB connection
-    if client:
+    if client is not None:
         client.close()
     
     return articles, titles 

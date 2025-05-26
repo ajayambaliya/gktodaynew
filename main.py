@@ -42,7 +42,7 @@ async def main():
         
         # Check MongoDB connection
         client, collection = get_mongodb_connection()
-        if not client:
+        if client is None or collection is None:
             print("Warning: MongoDB connection failed. Proceeding without URL tracking.")
         else:
             client.close()
