@@ -111,6 +111,9 @@ def create_modern_pdf(articles, titles, output_filename=None):
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
+    # Define PDF path
+    pdf_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.pdf")
+    
     try:
         # Try to import WeasyPrint and generate PDF
         from weasyprint import HTML, CSS
@@ -168,7 +171,6 @@ def create_modern_pdf(articles, titles, output_filename=None):
             css_list.append(fontawesome_css)
         
         # Generate PDF with proper page counter
-        pdf_path = os.path.join(PDF_OUTPUT_DIR, f"{output_filename}.pdf")
         document = HTML(filename=html_path).render(stylesheets=css_list, font_config=font_config)
         
         # Get actual page count and regenerate with correct total

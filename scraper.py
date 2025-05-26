@@ -25,7 +25,7 @@ def fetch_article_urls(base_url, pages):
         except Exception as e:
             print(f"Error retrieving scraped URLs: {str(e)}")
         finally:
-            # Close MongoDB connection
+            # Close MongoDB connection after getting the URLs
             if client is not None:
                 client.close()
     
@@ -96,11 +96,15 @@ def fetch_article_urls(base_url, pages):
     # If we have new URLs, prioritize them
     if new_urls:
         print(f"Found {len(new_urls)} new articles to process")
+        # Return all new URLs we found
         return new_urls
     else:
         print("No new articles found. Processing some existing articles.")
         # If no new URLs, return a limited number of existing ones
-        return all_urls[:10]  # Limit to 10 articles if all are already scraped
+        import random
+        # Randomly select 8 articles if all are already scraped
+        random_urls = random.sample(all_urls, min(8, len(all_urls)))
+        return random_urls
 
 def should_include_url(url):
     """

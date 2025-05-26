@@ -10,6 +10,11 @@ def get_mongodb_connection():
         tuple: (client, collection) - MongoDB client and collection objects
     """
     try:
+        # Check if MONGODB_URI is set
+        if not MONGODB_URI:
+            print("MongoDB URI is not set. Please set the MONGODB_URI environment variable.")
+            return None, None
+        
         # Connect to MongoDB using the URI from environment variables
         # Set serverSelectionTimeoutMS to reduce connection timeout
         client = pymongo.MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
