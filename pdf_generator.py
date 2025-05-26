@@ -128,7 +128,8 @@ def create_modern_pdf(articles, titles, output_filename=None):
         
         # Check for any 0xAB bytes anywhere in the file
         if b'\xab' in content:
-            print(f"Found {content.count(b'\xab')} instances of problematic byte 0xAB in file, cleaning...")
+            count = content.count(b'\xab')
+            print(f"Found {count} instances of problematic byte 0xAB in file, cleaning...")
             content = content.replace(b'\xab', b'')
             with open(html_path, 'wb') as f:
                 f.write(content)
