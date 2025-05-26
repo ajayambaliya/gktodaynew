@@ -294,9 +294,11 @@
     margin-bottom: var(--space-6);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--gray-200);
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
     position: relative;
-    break-inside: avoid;
+    display: flex;
+    flex-direction: column;
 }
 
 .article-header {
@@ -304,6 +306,8 @@
     border-bottom: 1px solid var(--gray-200);
     background-color: var(--bg-secondary);
     position: relative;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
 }
 
 .article-header::after {
@@ -319,7 +323,10 @@
 
 .article-content {
     padding: var(--space-4);
-    break-inside: avoid;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
 }
 
 /* Ensure links in article titles don't use default blue color */
@@ -354,19 +361,24 @@
 
 .hero-image-container {
     width: 100%;
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-2);
     position: relative;
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid var(--gray-200);
-    break-inside: avoid;
-    page-break-inside: avoid;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    max-height: 250px;
 }
 
 .hero-image {
     width: 100%;
     height: auto;
-    max-height: 300px;
+    max-height: 250px;
     object-fit: cover;
 }
 
@@ -645,21 +657,12 @@
     color: var(--primary-blue);
 }
 
-/* Ensure images don't cause page breaks */
-.hero-image-container {
-    width: 100%;
-    margin-bottom: var(--space-4);
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--gray-200);
-    break-inside: avoid;
-    page-break-inside: avoid;
-}
-
 /* Content blocks should avoid page breaks */
 .content-blocks {
-    break-inside: avoid-page;
+    break-inside: avoid-page !important;
+    page-break-inside: avoid !important;
+    page-break-before: avoid !important;
+    break-before: avoid !important;
 }
 
 /* Ensure article anchor doesn't cause layout issues */

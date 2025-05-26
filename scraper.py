@@ -176,9 +176,9 @@ def fetch_article_urls(base_url, pages):
         print(f"• Total processing time: {total_time:.1f} seconds")
         return unique_urls
     else:
-        print("✗ No new articles found. Processing some existing articles instead.")
-        # If no unique URLs, return a limited number of random existing ones
-        random_urls = random.sample(all_urls, min(8, len(all_urls)))
+        print("✗ No new articles found. Processing 2 random existing articles instead.")
+        # If no unique URLs, return exactly 2 random existing ones
+        random_urls = random.sample(all_urls, min(2, len(all_urls)))
         print(f"✓ Randomly selected {len(random_urls)} existing URLs for processing:")
         for i, url in enumerate(random_urls, 1):
             print(f"  {i}. {url}")

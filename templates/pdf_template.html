@@ -757,11 +757,9 @@
                 <div class="hero-image-container">
                     <img class="hero-image" src="{{ article.image }}" alt="Article Image">
                 </div>
+                {% endif %}
                 
                 <div class="content-blocks">
-                {% else %}
-                <div class="content-blocks">
-                {% endif %}
                     {% for block in article.content %}
                         {% if block.type == 'paragraph' %}
                             {% if block.is_gujarati %}
