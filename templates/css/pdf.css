@@ -8,7 +8,7 @@
     margin: 0;
     border-radius: 10px;
     overflow: hidden;
-    page-break-after: always;
+    page-break-after: auto;
     min-height: 98vh;
     position: relative;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -213,13 +213,13 @@
 .cover-page-continuation {
     background: linear-gradient(135deg, #4338ca 0%, #3b82f6 100%);
     color: white;
-    padding: 1cm;
+    padding: 2cm 1cm;
     margin: 0;
-    border-radius: 10px;
+    border-radius: 15px;
     overflow: hidden;
-    page-break-after: always;
+    page-break-after: auto;
     position: relative;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
     border: 1px solid var(--gray-200);
 }
 
@@ -288,18 +288,13 @@
 
 /* Article Layout */
 .modern-article {
-    background: var(--bg-primary);
-    border-radius: 12px;
+    background: white;
+    border-radius: 10px;
     overflow: hidden;
-    margin-bottom: var(--space-6);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--gray-200);
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    page-break-before: always !important;
-    break-before: always !important;
-    position: relative;
-    display: block;
+    page-break-inside: auto;
 }
 
 .article-header {
@@ -325,11 +320,7 @@
 
 .article-content {
     padding: var(--space-4);
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    page-break-before: avoid !important;
-    break-before: avoid !important;
-    display: block;
+    page-break-inside: auto;
 }
 
 /* Ensure links in article titles don't use default blue color */
@@ -363,28 +354,20 @@
 }
 
 .hero-image-container {
-    width: 100%;
-    margin-bottom: var(--space-2);
-    position: relative;
+    margin-bottom: var(--space-4);
+    max-width: 100%;
+    display: inline-block;
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid var(--gray-200);
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    page-break-before: avoid !important;
-    break-before: avoid !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
-    max-height: 200px;
-    display: block;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    page-break-inside: auto;
 }
 
 .hero-image {
     width: 100%;
     height: auto;
-    max-height: 200px;
-    object-fit: cover;
     display: block;
+    page-break-inside: auto;
 }
 
 .hero-image-overlay {
@@ -400,31 +383,30 @@
 
 .content-paragraph {
     margin-bottom: var(--space-3);
-    break-inside: avoid !important;
-    display: block;
+    line-height: 1.6;
+    page-break-inside: auto;
 }
 
 .gujarati-text {
     font-family: 'Noto Serif Gujarati', 'Hind Vadodara', serif;
-    font-size: 1rem;
-    line-height: 1.8;
-    letter-spacing: 0.02em;
-    word-spacing: 0.05em;
-    background: var(--bg-secondary);
-    border-radius: 6px;
+    background-color: var(--gray-50);
     border-left: 3px solid var(--primary-blue);
     padding: var(--space-3);
-    margin-bottom: var(--space-2);
-    text-align: justify;
+    margin-bottom: var(--space-3);
+    border-radius: 6px;
+    font-size: var(--text-base);
+    line-height: 1.8;
+    page-break-inside: auto;
 }
 
 .english-text {
     padding: var(--space-3);
-    border-radius: 6px;
-    margin-bottom: var(--space-3);
-    font-size: 0.95rem;
-    line-height: 1.5;
+    margin-bottom: var(--space-4);
     border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    font-size: var(--text-base);
+    line-height: 1.7;
+    page-break-inside: auto;
 }
 
 .content-bullet_list {
@@ -576,19 +558,15 @@
 
 /* Channel promotion box */
 .channel-promotion {
-    margin-top: var(--space-8);
-    padding: var(--space-4);
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border-radius: 12px;
-    border: 1px solid #bae6fd;
-    text-align: center;
+    background: linear-gradient(135deg, #27a7e7 0%, #0088cc 100%); /* Telegram brand colors */
+    border-radius: 15px;
+    padding: 3rem 2rem;
+    margin: 3rem 0;
+    color: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    page-break-inside: auto;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    page-break-before: always !important;
-    break-before: always !important;
 }
 
 .channel-promotion::before {
@@ -667,11 +645,10 @@
 
 /* Content blocks should avoid page breaks */
 .content-blocks {
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-    page-break-before: avoid !important;
-    break-before: avoid !important;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    page-break-inside: auto;
 }
 
 /* Ensure article anchor doesn't cause layout issues */
@@ -685,4 +662,9 @@
 /* Hide breadcrumb navigation in content */
 .content-navigation {
     display: none;
+}
+
+/* Prevent page break between image and first paragraph */
+.hero-image-container + .content-blocks > div:first-child {
+    page-break-before: avoid;
 } 
